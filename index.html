@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Professor</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome (para ícones) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Estilo base com a fonte Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Classe para esconder/mostrar elementos */
+        .hidden {
+            display: none;
+        }
+        /* Estilos para Abas Ativas/Inativas */
+        .tab-button {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .tab-button.active {
+            border-bottom-color: #4f46e5; /* indigo-600 */
+            color: #4f46e5; /* indigo-600 */
+        }
+        .tab-button:not(.active) {
+            border-bottom-color: transparent;
+            color: #6b7280; /* gray-500 */
+        }
+        .tab-button:not(.active):hover {
+            color: #374151; /* gray-700 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+
+    <!-- Container Global -->
+    <div class="min-h-screen flex flex-col items-center justify-center">
+
+        <!-- ===== TELA DE LOGIN ===== -->
+        <div id="auth-container" class="w-full max-w-md p-8">
+            <div class="bg-white p-8 rounded-2xl shadow-xl">
+                <h2 class="text-3xl font-bold text-center text-indigo-600 mb-8">Painel do Professor</h2>
+                
+                <!-- Formulário de Autenticação -->
+                <form id="auth-form" class="space-y-6">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="email" name="email" required
+                               class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+                        <input type="password" id="password" name="password" required
+                               class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button type="button" id="login-button"
+                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                            Entrar
+                        </button>
+                        <button type="button" id="signup-button"
+                                class="w-full flex justify-center py-3 px-4 border border-indigo-600 rounded-lg shadow-sm text-sm font-medium text-indigo-600 bg-white hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                            Cadastrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ===== TELA PRINCIPAL DO APP (Invisível por padrão) ===== -->
+        <div id="app-container" class="hidden w-full min-h-screen">
+            
+            <!-- Navbar -->
+            <nav class="bg-white shadow-md">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex items-center">
+                            <i class="fas fa-book-open text-indigo-600 text-2xl mr-2"></i>
+                            <span class="font-bold text-xl text-indigo-600">Painel do Professor</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span id="user-email" class="text-sm text-gray-600 mr-4"></span>
+                            <button id="logout-button" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                                Sair <i class="fas fa-sign-out-alt ml-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Conteúdo Principal -->
+            <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 w-full">
+                
+                <!-- 1. CONTAINER DA LISTA DE TURMAS (Visível por padrão) -->
+                <div id="turmas-list-container">
+                    <!-- Header da Seção de Turmas -->
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Minhas Turmas</h1>
+                        <button id="show-turma-modal-button" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow">
+                            <i class="fas fa-plus mr-2"></i> Nova Turma
+                        </button>
+                    </div>
+
+                    <!-- Lista de Turmas -->
+                    <div id="turmas-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Cards das turmas serão inseridos aqui pelo JS -->
+                        <p id="loading-turmas" class="text-gray-500">Carregando turmas...</p>
+                    </div>
+                </div>
+
+                <!-- 2. CONTAINER DE DETALHE DA TURMA (Invisível por padrão) -->
+                <div id="turma-detalhe-container" class="hidden">
+                    <!-- Header (Voltar e Nome da Turma) -->
+                    <div class="flex items-center mb-6">
+                        <button id="voltar-turmas-button" class="mr-4 p-2 rounded-full hover:bg-gray-200 transition-colors">
+                            <i class="fas fa-arrow-left text-indigo-600 text-xl"></i>
+                        </button>
+                        <h1 id="turma-detalhe-nome" class="text-3xl font-bold text-gray-800">Nome da Turma</h1>
+                    </div>
+
+                    <!-- Abas de Navegação (Alunos / Plano de Aula) -->
+                    <div class="mb-6 border-b border-gray-200">
+                        <nav class="flex space-x-6 -mb-px">
+                            <button id="tab-alunos" class="tab-button active py-4 px-1 border-b-4 text-sm sm:text-base font-medium">
+                                <i class="fas fa-users mr-2"></i>Alunos
+                            </button>
+                            <button id="tab-plano-aula" class="tab-button py-4 px-1 border-b-4 text-sm sm:text-base font-medium">
+                                <i class="fas fa-calendar-alt mr-2"></i>Plano de Aula
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Conteúdo das Abas -->
+                    <div>
+                        <!-- 2.1 Conteúdo da Aba Alunos -->
+                        <div id="alunos-content" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-6">Alunos da Turma</h2>
+
+                            <!-- Formulário de Novo Aluno -->
+                            <form id="novo-aluno-form" class="flex flex-col sm:flex-row gap-4 mb-6 pb-6 border-b border-gray-200">
+                                <input type="text" id="aluno-nome" placeholder="Nome do Aluno" required class="flex-grow px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <input type="text" id="aluno-matricula" placeholder="Matrícula (opcional)" class="sm:w-1/3 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                <button type="submit" class="px-5 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow">
+                                    <i class="fas fa-plus mr-2"></i> Adicionar Aluno
+                                </button>
+                            </form>
+
+                            <!-- Lista de Alunos -->
+                            <div id="alunos-list" class="space-y-4">
+                                <p id="loading-alunos" class="text-gray-500">Carregando alunos...</p>
+                            </div>
+                        </div>
+
+                        <!-- 2.2 Conteúdo da Aba Plano de Aula (Invisível por padrão) -->
+                        <div id="plano-aula-content" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-6">Plano de Aula</h2>
+
+                            <!-- Formulário de Novo Plano de Aula -->
+                            <form id="novo-plano-aula-form" class="mb-6 pb-6 border-b border-gray-200 space-y-4">
+                                <div class="flex flex-col sm:flex-row gap-4">
+                                    <div class="flex-grow">
+                                        <label for="plano-aula-topico" class="block text-sm font-medium text-gray-700">Tópico da Aula</label>
+                                        <input type="text" id="plano-aula-topico" placeholder="Ex: Aula 5 - Introdução à Célula" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div class="sm:w-1/3">
+                                        <label for="plano-aula-data" class="block text-sm font-medium text-gray-700">Data da Aula</label>
+                                        <input type="date" id="plano-aula-data" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="plano-aula-detalhes" class="block text-sm font-medium text-gray-700">Tópicos Abordados / Detalhes</label>
+                                    <textarea id="plano-aula-detalhes" rows="3" placeholder="Ex: O que é uma célula, tipos de célula..." class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                </div>
+                                <div>
+                                    <label for="plano-aula-atividades" class="block text-sm font-medium text-gray-700">Atividades / Tarefas</label>
+                                    <textarea id="plano-aula-atividades" rows="2" placeholder="Ex: Exercícios página 15" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                </div>
+                                <button type="submit" class="w-full px-5 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow">
+                                    <i class="fas fa-plus mr-2"></i> Adicionar ao Plano
+                                </button>
+                            </form>
+
+                            <!-- Lista de Planos de Aula -->
+                            <h3 class="text-xl font-bold text-gray-700 mb-4">Histórico de Aulas</h3>
+                            <p id="loading-planos-aula" class="text-gray-500">Carregando planos de aula...</p>
+                            <div id="plano-aula-list" class="space-y-4">
+                                <!-- Planos de aula serão inseridos aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+
+    </div>
+
+    <!-- ===== MODAL (POP-UP) PARA NOVA TURMA (Invisível por padrão) ===== -->
+    <div id="nova-turma-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Criar Nova Turma</h3>
+                <button id="close-turma-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    &times;
+                </button>
+            </div>
+            <form id="nova-turma-form" class="space-y-4">
+                <div>
+                    <label for="turma-nome" class="block text-sm font-medium text-gray-700">Nome da Turma</label>
+                    <input type="text" id="turma-nome" name="turma-nome" required placeholder="Ex: Turma 701"
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="turma-materia" class="block text-sm font-medium text-gray-700">Matéria / Assunto</label>
+                    <input type="text" id="turma-materia" name="turma-materia" required placeholder="Ex: Ciências"
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="pt-4">
+                    <button type="submit"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        Salvar Turma
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL (POP-UP) PARA OBSERVAÇÕES (Invisível por padrão) ===== -->
+    <div id="observacoes-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-2xl bg-white">
+            <!-- Header do Modal de Observações -->
+            <div class="flex justify-between items-center mb-6 pb-4 border-b">
+                <h3 id="observacao-aluno-nome" class="text-2xl font-bold text-gray-800">Observações de...</h3>
+                <button id="close-observacoes-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    &times;
+                </button>
+            </div>
+            
+            <!-- Formulário para Nova Observação -->
+            <form id="nova-observacao-form" class="mb-6">
+                <label for="nova-observacao-texto" class="block text-sm font-medium text-gray-700 mb-2">Nova Observação (aula de hoje, etc.):</label>
+                <textarea id="nova-observacao-texto" rows="3" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ex: Participou ativamente na discussão sobre..."></textarea>
+                <button type="submit"
+                        class="w-full mt-4 flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Salvar Observação
+                </button>
+            </form>
+
+            <!-- Lista de Observações Anteriores -->
+            <div>
+                <h4 class="text-lg font-bold text-gray-700 mb-4">Histórico de Observações</h4>
+                <p id="loading-observacoes" class="text-gray-500">Carregando...</p>
+                <div id="observacoes-list" class="space-y-4 max-h-64 overflow-y-auto pr-2">
+                    <!-- Observações serão inseridas aqui pelo JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ===== CAIXA DE MENSAGEM (Invisível por padrão) ===== -->
+    <div id="message-box" class="hidden fixed bottom-5 right-5 p-4 rounded-lg shadow-xl text-white">
+        <!-- O conteúdo e a cor (bg-red-500 ou bg-green-500) serão definidos via JS -->
+    </div>
+
+
+    <!-- ===== Firebase SDKs ===== -->
+    <script type="module">
+        // Importações do Firebase (módulos necessários)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword, 
+            onAuthStateChanged, 
+            signOut,
+            signInAnonymously,
+            signInWithCustomToken
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            collection, 
+            doc, 
+            addDoc, 
+            onSnapshot, 
+            query,
+            setLogLevel,
+            deleteDoc,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Configuração e Inicialização do Firebase ---
+        
+        let firebaseConfig, appId, initialAuthToken;
+
+        try {
+            if (typeof __firebase_config !== 'undefined' && __firebase_config !== "{}") {
+                firebaseConfig = JSON.parse(__firebase_config);
+            } else {
+                firebaseConfig = {
+                    apiKey: "AIzaSyBX7l2BT5-J47dP2ztUuHZ98Dm2gqEytzI",
+                    authDomain: "painel-do-professor.firebaseapp.com",
+                    projectId: "painel-do-professor",
+                    storageBucket: "painel-do-professor.firebasestorage.app",
+                    messagingSenderId: "804507772279",
+                    appId: "1:804507772279:web:32bb6186d89944cc64ad72"
+                };
+            }
+            
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+            initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        } catch (e) {
+            console.error("Erro ao parsear configuração do Firebase:", e);
+            firebaseConfig = {
+                apiKey: "AIzaSyBX7l2BT5-J47dP2ztUuHZ98Dm2gqEytzI",
+                authDomain: "painel-do-professor.firebaseapp.com",
+                projectId: "painel-do-professor",
+                storageBucket: "painel-do-professor.firebasestorage.app",
+                messagingSenderId: "804507772279",
+                appId: "1:804507772279:web:32bb6186d89944cc64ad72"
+            };
+            appId = 'default-app-id';
+            initialAuthToken = null;
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        setLogLevel('Debug');
+
+        // --- Variáveis Globais de Estado ---
+        let currentUserId = null;
+        let selectedTurmaId = null;
+        let selectedAlunoId = null; 
+        let unsubscribeTurmas = null;
+        let unsubscribeAlunos = null;
+        let unsubscribeObservacoes = null;
+        let unsubscribePlanosDeAula = null; // <-- Novo: Para Planos de Aula
+
+        // --- Elementos da DOM (Autenticação e App) ---
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const loginButton = document.getElementById('login-button');
+        const signupButton = document.getElementById('signup-button');
+        const logoutButton = document.getElementById('logout-button');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const userEmailSpan = document.getElementById('user-email');
+        const messageBox = document.getElementById('message-box');
+
+        // --- Elementos da DOM (Lista de Turmas) ---
+        const turmasListContainer = document.getElementById('turmas-list-container');
+        const turmasList = document.getElementById('turmas-list');
+        const loadingTurmas = document.getElementById('loading-turmas');
+        
+        // --- Elementos da DOM (Modal Nova Turma) ---
+        const novaTurmaModal = document.getElementById('nova-turma-modal');
+        const showTurmaModalButton = document.getElementById('show-turma-modal-button');
+        const closeTurmaModalButton = document.getElementById('close-turma-modal-button');
+        const novaTurmaForm = document.getElementById('nova-turma-form');
+        const turmaNomeInput = document.getElementById('turma-nome');
+        const turmaMateriaInput = document.getElementById('turma-materia');
+        
+        // --- Elementos da DOM (Detalhe da Turma) ---
+        const turmaDetalheContainer = document.getElementById('turma-detalhe-container');
+        const voltarTurmasButton = document.getElementById('voltar-turmas-button');
+        const turmaDetalheNome = document.getElementById('turma-detalhe-nome');
+
+        // --- Elementos da DOM (Abas) ---
+        const tabAlunos = document.getElementById('tab-alunos');
+        const tabPlanoAula = document.getElementById('tab-plano-aula');
+        const alunosContent = document.getElementById('alunos-content');
+        const planoAulaContent = document.getElementById('plano-aula-content');
+
+        // --- Elementos da DOM (Aba Alunos) ---
+        const novoAlunoForm = document.getElementById('novo-aluno-form');
+        const alunoNomeInput = document.getElementById('aluno-nome');
+        const alunoMatriculaInput = document.getElementById('aluno-matricula');
+        const alunosList = document.getElementById('alunos-list');
+        const loadingAlunos = document.getElementById('loading-alunos');
+
+        // --- Elementos da DOM (Aba Plano de Aula) ---
+        const novoPlanoAulaForm = document.getElementById('novo-plano-aula-form');
+        const planoAulaTopico = document.getElementById('plano-aula-topico');
+        const planoAulaData = document.getElementById('plano-aula-data');
+        const planoAulaDetalhes = document.getElementById('plano-aula-detalhes');
+        const planoAulaAtividades = document.getElementById('plano-aula-atividades');
+        const loadingPlanosAula = document.getElementById('loading-planos-aula');
+        const planoAulaList = document.getElementById('plano-aula-list');
+
+
+        // --- Elementos da DOM (Modal Observações) ---
+        const observacoesModal = document.getElementById('observacoes-modal');
+        const closeObservacoesModalButton = document.getElementById('close-observacoes-modal-button');
+        const observacaoAlunoNome = document.getElementById('observacao-aluno-nome');
+        const novaObservacaoForm = document.getElementById('nova-observacao-form');
+        const novaObservacaoTexto = document.getElementById('nova-observacao-texto');
+        const observacoesList = document.getElementById('observacoes-list');
+        const loadingObservacoes = document.getElementById('loading-observacoes');
+
+
+        // --- Funções Auxiliares ---
+
+        function showMessage(message, type = 'success') {
+            messageBox.textContent = message;
+            messageBox.classList.remove('hidden', 'bg-green-500', 'bg-red-500');
+            messageBox.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+            setTimeout(() => { messageBox.classList.add('hidden'); }, 3000);
+        }
+
+        // --- Controle do Modal (Turma) ---
+
+        function openModal() { novaTurmaModal.classList.remove('hidden'); }
+        function closeModal() {
+            novaTurmaModal.classList.add('hidden');
+            novaTurmaForm.reset();
+        }
+        showTurmaModalButton.addEventListener('click', openModal);
+        closeTurmaModalButton.addEventListener('click', closeModal);
+
+        // --- Controle do Modal (Observações) ---
+
+        function showObservacoesModal(alunoId, alunoNome) {
+            selectedAlunoId = alunoId; 
+            observacaoAlunoNome.textContent = `Observações de ${alunoNome}`;
+            observacoesModal.classList.remove('hidden');
+            loadingObservacoes.classList.remove('hidden'); 
+            observacoesList.innerHTML = '';
+            carregarObservacoes(); 
+        }
+
+        function closeObservacoesModal() {
+            observacoesModal.classList.add('hidden');
+            novaObservacaoForm.reset(); 
+            selectedAlunoId = null; 
+            
+            if (unsubscribeObservacoes) {
+                unsubscribeObservacoes();
+                unsubscribeObservacoes = null;
+            }
+        }
+        closeObservacoesModalButton.addEventListener('click', closeObservacoesModal);
+
+
+        // --- Lógica de Navegação (Roteamento e Abas) ---
+
+        function showTurmaDetalhe(turmaId, turmaNome) {
+            selectedTurmaId = turmaId;
+            turmaDetalheNome.textContent = turmaNome;
+            turmasListContainer.classList.add('hidden');
+            turmaDetalheContainer.classList.remove('hidden');
+            
+            // Define a aba "Alunos" como padrão ao abrir
+            switchTab('alunos');
+            carregarAlunos();
+            carregarPlanosDeAula(); // Carrega os planos em segundo plano
+        }
+
+        function showTurmasList() {
+            turmaDetalheContainer.classList.add('hidden');
+            turmasListContainer.classList.remove('hidden');
+            selectedTurmaId = null;
+            
+            // Limpa todos os listeners da turma
+            if (unsubscribeAlunos) unsubscribeAlunos();
+            if (unsubscribeObservacoes) unsubscribeObservacoes();
+            if (unsubscribePlanosDeAula) unsubscribePlanosDeAula();
+        }
+        voltarTurmasButton.addEventListener('click', showTurmasList);
+
+        // Lógica de clique nas Abas
+        tabAlunos.addEventListener('click', () => switchTab('alunos'));
+        tabPlanoAula.addEventListener('click', () => switchTab('plano-aula'));
+
+        function switchTab(tab) {
+            if (tab === 'alunos') {
+                tabAlunos.classList.add('active');
+                tabPlanoAula.classList.remove('active');
+                alunosContent.classList.remove('hidden');
+                planoAulaContent.classList.add('hidden');
+            } else if (tab === 'plano-aula') {
+                tabAlunos.classList.remove('active');
+                tabPlanoAula.classList.add('active');
+                alunosContent.classList.add('hidden');
+                planoAulaContent.classList.remove('hidden');
+            }
+        }
+
+        // --- Lógica de Autenticação ---
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                userEmailSpan.textContent = user.email;
+                authContainer.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                
+                showTurmasList();
+                carregarTurmas();
+
+            } else {
+                currentUserId = null;
+                authContainer.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+                
+                if (unsubscribeTurmas) unsubscribeTurmas();
+                showTurmasList(); // Garante que limpa todos os listeners
+            }
+        });
+
+        async function authComTokenInicial() {
+            if (initialAuthToken) {
+                try {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } catch (error) {
+                    console.log("Aguardando login manual.");
+                }
+            } else {
+                console.log("Nenhum token inicial, aguardando login manual.");
+            }
+        }
+        authComTokenInicial();
+
+
+        loginButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+                showMessage("Login realizado com sucesso!", "success");
+            } catch (error) {
+                showMessage(error.code === 'auth/invalid-credential' ? "Email ou senha incorretos." : "Erro ao tentar entrar.", "error");
+            }
+        });
+
+        signupButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+                showMessage("Cadastro realizado! Você já está logado.", "success");
+            } catch (error) {
+                let msg = "Erro ao tentar cadastrar.";
+                if (error.code === 'auth/email-already-in-use') msg = "Este email já está em uso.";
+                if (error.code === 'auth/weak-password') msg = "A senha deve ter pelo menos 6 caracteres.";
+                showMessage(msg, "error");
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                showMessage("Você saiu com sucesso.", "success");
+                showTurmasList();
+            } catch (error) {
+                showMessage("Erro ao tentar sair.", "error");
+            }
+        });
+
+
+        // --- Lógica do Firestore (Turmas) ---
+
+        function carregarTurmas() {
+            if (!currentUserId) return;
+            const collectionPath = `usuarios/${currentUserId}/turmas`;
+            const q = query(collection(db, collectionPath));
+            
+            if (unsubscribeTurmas) unsubscribeTurmas();
+            unsubscribeTurmas = onSnapshot(q, (snapshot) => {
+                loadingTurmas.classList.add('hidden');
+                turmasList.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    turmasList.innerHTML = '<p class="text-gray-500 col-span-full text-center">Nenhuma turma encontrada. Crie sua primeira turma!</p>';
+                    return;
+                }
+                
+                snapshot.forEach((doc) => {
+                    const turma = doc.data();
+                    const turmaId = doc.id;
+                    
+                    const turmaCard = document.createElement('div');
+                    turmaCard.className = "bg-white p-6 rounded-2xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between";
+                    turmaCard.innerHTML = `
+                        <div>
+                            <h3 class="text-xl font-bold text-indigo-700">${turma.nome}</h3>
+                            <p class="text-gray-600 mt-2">${turma.materia}</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-end">
+                            <button data-id="${turmaId}" class="delete-turma-button text-red-500 hover:text-red-700 text-sm font-medium">
+                                <i class="fas fa-trash mr-1"></i> Excluir
+                            </button>
+                        </div>
+                    `;
+                    
+                    turmaCard.addEventListener('click', (e) => {
+                        if (e.target.closest('.delete-turma-button')) return;
+                        showTurmaDetalhe(turmaId, turma.nome);
+                    });
+
+                    turmaCard.querySelector('.delete-turma-button').addEventListener('click', (e) => {
+                        e.stopPropagation(); 
+                        handleDeleteTurma(turmaId, turma.nome);
+                    });
+
+                    turmasList.appendChild(turmaCard);
+                });
+            }, (error) => { showMessage("Erro ao carregar suas turmas.", "error"); });
+        }
+
+        novaTurmaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return;
+            try {
+                const collectionPath = `usuarios/${currentUserId}/turmas`;
+                await addDoc(collection(db, collectionPath), {
+                    nome: turmaNomeInput.value,
+                    materia: turmaMateriaInput.value,
+                });
+                showMessage("Turma criada com sucesso!", "success");
+                closeModal();
+            } catch (error) { showMessage("Erro ao salvar a turma.", "error"); }
+        });
+
+        async function handleDeleteTurma(turmaId, turmaNome) {
+            console.warn("Confirmação de exclusão pulada.");
+            if (!currentUserId) return;
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${turmaId}`;
+                await deleteDoc(doc(db, docPath));
+                showMessage(`Turma "${turmaNome}" excluída.`, "success");
+            } catch (error) { showMessage("Erro ao excluir a turma.", "error"); }
+        }
+
+
+        // --- Lógica do Firestore (Alunos) ---
+
+        function carregarAlunos() {
+            if (!currentUserId || !selectedTurmaId) return;
+
+            loadingAlunos.classList.remove('hidden'); // Mostra o loading ao carregar
+            alunosList.innerHTML = '';
+
+            const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos`;
+            const q = query(collection(db, collectionPath));
+
+            if (unsubscribeAlunos) unsubscribeAlunos();
+            unsubscribeAlunos = onSnapshot(q, (snapshot) => {
+                loadingAlunos.classList.add('hidden');
+                alunosList.innerHTML = '';
+
+                if (snapshot.empty) {
+                    alunosList.innerHTML = '<p class="text-gray-500 text-center">Nenhum aluno cadastrado nesta turma.</p>';
+                    return;
+                }
+
+                snapshot.forEach((doc) => {
+                    const aluno = doc.data();
+                    const alunoId = doc.id;
+
+                    const alunoCard = document.createElement('div');
+                    alunoCard.className = "flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-gray-50 p-4 rounded-lg shadow-sm";
+                    alunoCard.innerHTML = `
+                        <div>
+                            <p class="font-bold text-gray-800">${aluno.nome}</p>
+                            <p class="text-sm text-gray-600">${aluno.matricula || 'Sem matrícula'}</p>
+                        </div>
+                        <div class="flex gap-2 flex-shrink-0">
+                            <button data-id="${alunoId}" class="observacoes-aluno-button px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm">
+                                <i class="fas fa-comment-dots mr-1"></i> Observações
+                            </button>
+                            <button data-id="${alunoId}" class="delete-aluno-button px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    alunoCard.querySelector('.observacoes-aluno-button').addEventListener('click', () => {
+                        showObservacoesModal(alunoId, aluno.nome);
+                    });
+
+                    alunoCard.querySelector('.delete-aluno-button').addEventListener('click', () => {
+                        handleDeleteAluno(alunoId, aluno.nome);
+                    });
+
+                    alunosList.appendChild(alunoCard);
+                });
+            }, (error) => { showMessage("Erro ao carregar alunos.", "error"); });
+        }
+
+        novoAlunoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId || !selectedTurmaId) return;
+            const nome = alunoNomeInput.value;
+            if (!nome) {
+                showMessage("O nome do aluno é obrigatório.", "error");
+                return;
+            }
+            try {
+                const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos`;
+                await addDoc(collection(db, collectionPath), {
+                    nome: nome,
+                    matricula: alunoMatriculaInput.value || ""
+                });
+                showMessage("Aluno adicionado!", "success");
+                novoAlunoForm.reset();
+            } catch (error) { showMessage("Erro ao salvar o aluno.", "error"); }
+        });
+
+        async function handleDeleteAluno(alunoId, alunoNome) {
+            console.warn("Confirmação de exclusão pulada.");
+            if (!currentUserId || !selectedTurmaId) return;
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos/${alunoId}`;
+                await deleteDoc(doc(db, docPath));
+                showMessage(`Aluno "${alunoNome}" excluído.`, "success");
+            } catch (error) { showMessage("Erro ao excluir o aluno.", "error"); }
+        }
+
+
+        // --- Lógica do Firestore (Observações) ---
+
+        function carregarObservacoes() {
+            if (!currentUserId || !selectedTurmaId || !selectedAlunoId) return;
+
+            const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos/${selectedAlunoId}/observacoesAula`;
+            const q = query(collection(db, collectionPath));
+            
+            if (unsubscribeObservacoes) unsubscribeObservacoes();
+
+            unsubscribeObservacoes = onSnapshot(q, (snapshot) => {
+                loadingObservacoes.classList.add('hidden');
+                observacoesList.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    observacoesList.innerHTML = '<p class="text-gray-500 text-center">Nenhuma observação registrada.</p>';
+                    return;
+                }
+
+                const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                const docsOrdenados = docs.sort((a, b) => {
+                    const dataA = a.data?.toMillis() || 0;
+                    const dataB = b.data?.toMillis() || 0;
+                    return dataB - dataA;
+                });
+
+                docsOrdenados.forEach((obs) => {
+                    const obsCard = document.createElement('div');
+                    obsCard.className = "bg-gray-100 p-3 rounded-lg";
+                    
+                    const dataFormatada = obs.data 
+                        ? obs.data.toDate().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'medium' })
+                        : 'Salvando...';
+                    
+                    obsCard.innerHTML = `
+                        <div class="flex justify-between items-center mb-1">
+                            <p class="text-sm font-bold text-gray-700">${dataFormatada}</p>
+                            <button data-id="${obs.id}" class="delete-observacao-button text-xs text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <p class="text-gray-800 whitespace-pre-wrap">${obs.texto}</p>
+                    `;
+                    
+                    obsCard.querySelector('.delete-observacao-button').addEventListener('click', () => {
+                        handleDeleteObservacao(obs.id);
+                    });
+
+                    observacoesList.appendChild(obsCard);
+                });
+
+            }, (error) => { showMessage("Erro ao carregar observações.", "error"); });
+        }
+
+        novaObservacaoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId || !selectedTurmaId || !selectedAlunoId) return;
+            const texto = novaObservacaoTexto.value;
+            if (!texto) {
+                showMessage("Escreva uma observação.", "error");
+                return;
+            }
+            try {
+                const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos/${selectedAlunoId}/observacoesAula`;
+                await addDoc(collection(db, collectionPath), {
+                    texto: texto,
+                    data: serverTimestamp()
+                });
+                novaObservacaoForm.reset();
+            } catch (error) { showMessage("Erro ao salvar observação.", "error"); }
+        });
+
+        async function handleDeleteObservacao(obsId) {
+            console.warn("Confirmação de exclusão pulada.");
+            if (!currentUserId || !selectedTurmaId || !selectedAlunoId) return;
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos/${selectedAlunoId}/observacoesAula/${obsId}`;
+                await deleteDoc(doc(db, docPath));
+            } catch (error) { showMessage("Erro ao excluir observação.", "error"); }
+        }
+
+        // --- Lógica do Firestore (Plano de Aula) ---
+
+        function carregarPlanosDeAula() {
+            if (!currentUserId || !selectedTurmaId) return;
+
+            loadingPlanosAula.classList.remove('hidden');
+            planoAulaList.innerHTML = '';
+
+            const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/planosDeAula`;
+            const q = query(collection(db, collectionPath));
+
+            if (unsubscribePlanosDeAula) unsubscribePlanosDeAula();
+
+            unsubscribePlanosDeAula = onSnapshot(q, (snapshot) => {
+                loadingPlanosAula.classList.add('hidden');
+                planoAulaList.innerHTML = '';
+
+                if (snapshot.empty) {
+                    planoAulaList.innerHTML = '<p class="text-gray-500 text-center">Nenhum plano de aula registrado.</p>';
+                    return;
+                }
+
+                // 1. Converter para array
+                const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // 2. Ordenar por data da aula (mais recentes primeiro)
+                const docsOrdenados = docs.sort((a, b) => {
+                    // Se a dataAula não existir, use data de criação
+                    const dataA = new Date(a.dataAula || a.criadoEm?.toDate() || 0);
+                    const dataB = new Date(b.dataAula || b.criadoEm?.toDate() || 0);
+                    return dataB - dataA;
+                });
+
+                // 3. Renderizar
+                docsOrdenados.forEach((plano) => {
+                    const planoCard = document.createElement('div');
+                    planoCard.className = "bg-gray-50 p-4 rounded-lg shadow-sm";
+                    
+                    // Formata a data (YYYY-MM-DD) para DD/MM/YYYY
+                    let dataFormatada = 'Sem data';
+                    if (plano.dataAula) {
+                        const [ano, mes, dia] = plano.dataAula.split('-');
+                        dataFormatada = `${dia}/${mes}/${ano}`;
+                    }
+
+                    planoCard.innerHTML = `
+                        <div class="flex justify-between items-center mb-2">
+                            <div>
+                                <h4 class="text-lg font-bold text-indigo-700">${plano.topicoAula || 'Sem Tópico'}</h4>
+                                <p class="text-sm font-medium text-gray-600">${dataFormatada}</p>
+                            </div>
+                            <button data-id="${plano.id}" class="delete-plano-button text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-2 mt-3">
+                            ${plano.detalhes ? `
+                            <div>
+                                <p class="text-xs font-bold text-gray-500">DETALHES</p>
+                                <p class="text-gray-800 whitespace-pre-wrap">${plano.detalhes}</p>
+                            </div>` : ''}
+                            ${plano.atividades ? `
+                            <div>
+                                <p class="text-xs font-bold text-gray-500">ATIVIDADES</p>
+                                <p class="text-gray-800 whitespace-pre-wrap">${plano.atividades}</p>
+                            </div>` : ''}
+                        </div>
+                    `;
+
+                    planoCard.querySelector('.delete-plano-button').addEventListener('click', () => {
+                        handleDeletePlanoDeAula(plano.id, plano.topicoAula);
+                    });
+
+                    planoAulaList.appendChild(planoCard);
+                });
+
+            }, (error) => { 
+                console.error("Erro ao carregar planos de aula: ", error);
+                showMessage("Erro ao carregar planos de aula.", "error"); 
+            });
+        }
+
+        /** Salva um novo Plano de Aula */
+        novoPlanoAulaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId || !selectedTurmaId) return;
+
+            // Pega os valores
+            const topico = planoAulaTopico.value;
+            const data = planoAulaData.value;
+            const detalhes = planoAulaDetalhes.value;
+            const atividades = planoAulaAtividades.value;
+
+            if (!topico || !data) {
+                showMessage("Tópico da aula e Data são obrigatórios.", "error");
+                return;
+            }
+
+            try {
+                const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/planosDeAula`;
+                await addDoc(collection(db, collectionPath), {
+                    topicoAula: topico,
+                    dataAula: data, // Salva como string (YYYY-MM-DD)
+                    detalhes: detalhes || "",
+                    atividades: atividades || "",
+                    criadoEm: serverTimestamp() // Para saber quando foi criado
+                });
+
+                showMessage("Plano de aula salvo!", "success");
+                novoPlanoAulaForm.reset();
+
+            } catch (error) {
+                console.error("Erro ao salvar plano de aula: ", error);
+                showMessage("Erro ao salvar plano de aula.", "error");
+            }
+        });
+
+        /** Deleta um Plano de Aula */
+        async function handleDeletePlanoDeAula(planoId, planoTopico) {
+            console.warn("Confirmação de exclusão pulada.");
+            if (!currentUserId || !selectedTurmaId) return;
+
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/planosDeAula/${planoId}`;
+                await deleteDoc(doc(db, docPath));
+                showMessage(`Plano "${planoTopico}" excluído.`, "success");
+            } catch (error) {
+                console.error("Erro ao excluir plano de aula: ", error);
+                showMessage("Erro ao excluir plano de aula.", "error");
+            }
+        }
+
+
+    </script>
+</body>
+</html>
