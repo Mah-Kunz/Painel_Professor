@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts (Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome (para ícones) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -34,6 +34,22 @@
             color: #6b7280; /* gray-500 */
         }
         .tab-button:not(.active):hover {
+            color: #374151; /* gray-700 */
+        }
+        
+        /* Abas do Dashboard do Aluno */
+        .dashboard-tab-button {
+            transition: color 0.3s, border-bottom-color 0.3s;
+        }
+        .dashboard-tab-button.active {
+            border-bottom-color: #059669; /* green-600 */
+            color: #059669; /* green-600 */
+        }
+        .dashboard-tab-button:not(.active) {
+            border-bottom-color: transparent;
+            color: #6b7280; /* gray-500 */
+        }
+        .dashboard-tab-button:not(.active):hover {
             color: #374151; /* gray-700 */
         }
     </style>
@@ -79,7 +95,7 @@
         <!-- ===== TELA PRINCIPAL DO APP (Invisível por padrão) ===== -->
         <div id="app-container" class="hidden w-full min-h-screen">
             
-            <!-- Navbar -->
+            <!-- Navbar (MODIFICADA) -->
             <nav class="bg-white shadow-md">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
@@ -88,7 +104,14 @@
                             <span class="font-bold text-xl text-indigo-600">Painel do Professor</span>
                         </div>
                         <div class="flex items-center">
-                            <span id="user-email" class="text-sm text-gray-600 mr-4"></span>
+                            <!-- Botão de Perfil (NOVO) -->
+                            <button id="open-perfil-modal-button" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                <div id="navbar-foto-preview" class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-indigo-100">
+                                    <!-- Foto do perfil ou placeholder -->
+                                </div>
+                                <span id="user-greeting" class="text-sm text-gray-700 mr-4 font-medium">Carregando...</span>
+                            </button>
+                            
                             <button id="logout-button" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">
                                 Sair <i class="fas fa-sign-out-alt ml-1"></i>
                             </button>
@@ -127,14 +150,32 @@
                         <h1 id="turma-detalhe-nome" class="text-3xl font-bold text-gray-800">Nome da Turma</h1>
                     </div>
 
-                    <!-- Abas de Navegação (Alunos / Plano de Aula) -->
+                    <!-- Mural de Avisos -->
+                    <div id="mural-avisos-container" class="mb-6 bg-yellow-50 border border-yellow-200 p-4 rounded-2xl shadow-sm">
+                        <label for="mural-avisos-textarea" class="block text-sm font-bold text-yellow-800 mb-2">
+                            <i class="fas fa-thumbtack mr-1"></i> Mural de Avisos / Lembretes Rápidos
+                        </label>
+                        <textarea id="mural-avisos-textarea" rows="3" class="w-full p-3 border border-yellow-300 rounded-lg shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 bg-white" placeholder="Ex: Prova dia 20, não esquecer cartolina..."></textarea>
+                        <button id="salvar-mural-button" class="mt-3 w-full sm:w-auto px-5 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition-colors shadow">
+                            <i class="fas fa-save mr-2"></i> Salvar Mural
+                        </button>
+                    </div>
+
+
+                    <!-- Abas de Navegação -->
                     <div class="mb-6 border-b border-gray-200">
-                        <nav class="flex space-x-6 -mb-px">
+                        <nav class="flex flex-wrap space-x-4 sm:space-x-6 -mb-px">
                             <button id="tab-alunos" class="tab-button active py-4 px-1 border-b-4 text-sm sm:text-base font-medium">
                                 <i class="fas fa-users mr-2"></i>Alunos
                             </button>
+                            <button id="tab-frequencia" class="tab-button py-4 px-1 border-b-4 text-sm sm:text-base font-medium">
+                                <i class="fas fa-check-square mr-2"></i>Frequência
+                            </button>
                             <button id="tab-plano-aula" class="tab-button py-4 px-1 border-b-4 text-sm sm:text-base font-medium">
                                 <i class="fas fa-calendar-alt mr-2"></i>Plano de Aula
+                            </button>
+                            <button id="tab-notas" class="tab-button py-4 px-1 border-b-4 text-sm sm:text-base font-medium">
+                                <i class="fas fa-graduation-cap mr-2"></i>Atividades & Notas
                             </button>
                         </nav>
                     </div>
@@ -145,11 +186,36 @@
                         <div id="alunos-content" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">Alunos da Turma</h2>
 
-                            <!-- Formulário de Novo Aluno -->
-                            <form id="novo-aluno-form" class="flex flex-col sm:flex-row gap-4 mb-6 pb-6 border-b border-gray-200">
-                                <input type="text" id="aluno-nome" placeholder="Nome do Aluno" required class="flex-grow px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <input type="text" id="aluno-matricula" placeholder="Matrícula (opcional)" class="sm:w-1/3 px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                                <button type="submit" class="px-5 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow">
+                            <!-- Formulário de Novo Aluno (COM UPLOAD) -->
+                            <form id="novo-aluno-form" class="mb-6 pb-6 border-b border-gray-200 space-y-4">
+                                <!-- Linha 1: Nome e Data de Nascimento -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="aluno-nome" class="block text-sm font-medium text-gray-700">Nome do Aluno</label>
+                                        <input type="text" id="aluno-nome" placeholder="Nome completo" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                    <div>
+                                        <label for="aluno-nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+                                        <input type="date" id="aluno-nascimento" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                </div>
+                                <!-- Linha 2: Upload da Foto -->
+                                <div>
+                                    <label for="aluno-foto-input" class="block text-sm font-medium text-gray-700">Foto do Aluno</label>
+                                    <input type="file" id="aluno-foto-input" accept="image/*" class="mt-1 block w-full text-sm text-gray-500
+                                        file:mr-4 file:py-2 file:px-4
+                                        file:rounded-lg file:border-0
+                                        file:text-sm file:font-semibold
+                                        file:bg-indigo-50 file:text-indigo-700
+                                        hover:file:bg-indigo-100">
+                                </div>
+                                <!-- Linha 3: Informações Gerais -->
+                                <div>
+                                    <label for="aluno-info-geral" class="block text-sm font-medium text-gray-700">Informações Gerais</label>
+                                    <textarea id="aluno-info-geral" rows="3" placeholder="Ex: Alergias, contato dos pais, observações permanentes..." class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                </div>
+                                
+                                <button type="submit" id="submit-aluno-button" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow">
                                     <i class="fas fa-plus mr-2"></i> Adicionar Aluno
                                 </button>
                             </form>
@@ -160,7 +226,36 @@
                             </div>
                         </div>
 
-                        <!-- 2.2 Conteúdo da Aba Plano de Aula (Invisível por padrão) -->
+                        <!-- 2.2 Conteúdo da Aba Frequência -->
+                        <div id="frequencia-content" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+                            <h2 class="text-2xl font-bold text-gray-800 mb-6">Controle de Frequência</h2>
+                            
+                            <!-- Seletor de Data -->
+                            <div class="flex flex-col sm:flex-row gap-4 mb-6 pb-6 border-b border-gray-200">
+                                <div class="flex-grow">
+                                    <label for="frequencia-data-input" class="block text-sm font-medium text-gray-700">Selecione o Dia</label>
+                                    <input type="date" id="frequencia-data-input" class="mt-1 w-full sm:w-auto px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                                <button id="carregar-frequencia-button" class="w-full sm:w-auto px-5 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow self-end">
+                                    Carregar Dia
+                                </button>
+                            </div>
+                            
+                            <!-- Indicador de Loading -->
+                            <p id="loading-frequencia" class="text-gray-500 text-center mb-4 hidden">Carregando...</p>
+                            
+                            <!-- Lista de Alunos para Frequência -->
+                            <div id="frequencia-alunos-list" class="space-y-3 mb-6">
+                                <!-- O texto inicial foi movido para o JS -->
+                            </div>
+                            
+                            <!-- Botão Salvar -->
+                            <button id="salvar-frequencia-button" class="hidden w-full px-5 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow">
+                                <i class="fas fa-save mr-2"></i> Salvar Frequência
+                            </button>
+                        </div>
+                        
+                        <!-- 2.3 Conteúdo da Aba Plano de Aula -->
                         <div id="plano-aula-content" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">Plano de Aula</h2>
 
@@ -196,6 +291,67 @@
                                 <!-- Planos de aula serão inseridos aqui -->
                             </div>
                         </div>
+                        
+                        <!-- 2.4 Conteúdo da Aba Atividades & Notas -->
+                        <div id="notas-content" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
+                            
+                            <!-- Sub-tela: Lista de Atividades (Padrão) -->
+                            <div id="notas-lista-atividades">
+                                <!-- Header com botão de exportar -->
+                                <div class="flex justify-between items-center mb-6">
+                                    <h2 class="text-2xl font-bold text-gray-800">Atividades & Notas</h2>
+                                    <button id="exportar-csv-button" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow text-sm">
+                                        <i class="fas fa-file-csv mr-2"></i> Exportar CSV
+                                    </button>
+                                </div>
+                                
+                                <!-- Formulário de Nova Atividade -->
+                                <form id="nova-atividade-form" class="mb-6 pb-6 border-b border-gray-200 space-y-4">
+                                    <div class="flex flex-col sm:flex-row gap-4">
+                                        <div class="flex-grow">
+                                            <label for="nova-atividade-nome" class="block text-sm font-medium text-gray-700">Nome da Atividade</label>
+                                            <input type="text" id="nova-atividade-nome" placeholder="Ex: Prova 1" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        </div>
+                                        <div class="sm:w-1/3">
+                                            <label for="nova-atividade-valor" class="block text-sm font-medium text-gray-700">Valor Máximo</label>
+                                            <input type="number" id="nova-atividade-valor" placeholder="Ex: 10" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="w-full px-5 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow">
+                                        <i class="fas fa-plus mr-2"></i> Criar Atividade
+                                    </button>
+                                </form>
+                                
+                                <!-- Lista de Atividades Criadas -->
+                                <h3 class="text-xl font-bold text-gray-700 mb-4">Atividades Criadas</h3>
+                                <p id="loading-atividades" class="text-gray-500">Carregando atividades...</p>
+                                <div id="atividades-list" class="space-y-4">
+                                    <!-- Atividades serão inseridas aqui -->
+                                </div>
+                            </div>
+
+                            <!-- Sub-tela: Lançamento de Notas (Invisível por padrão) -->
+                            <div id="notas-lancamento-container" class="hidden">
+                                <!-- Header (Voltar e Nome da Atividade) -->
+                                <div class="flex items-center mb-6">
+                                    <button id="voltar-atividades-button" class="mr-4 p-2 rounded-full hover:bg-gray-200 transition-colors">
+                                        <i class="fas fa-arrow-left text-indigo-600 text-xl"></i>
+                                    </button>
+                                    <h2 id="lancamento-atividade-nome" class="text-2xl font-bold text-gray-800">Lançar Notas: ...</h2>
+                                </div>
+                                
+                                <!-- Lista de Alunos para Lançamento -->
+                                <div id="lancamento-alunos-list" class="space-y-3 mb-6">
+                                    <!-- Alunos com inputs de nota serão inseridos aqui -->
+                                    <p id="loading-lancamento-alunos" class="text-gray-500">Carregando alunos...</p>
+                                </div>
+                                
+                                <button id="salvar-notas-button" class="w-full px-5 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow">
+                                    <i class="fas fa-save mr-2"></i> Salvar Notas
+                                </button>
+                            </div>
+                            
+                        </div>
                     </div>
                 </div>
 
@@ -204,16 +360,19 @@
 
     </div>
 
-    <!-- ===== MODAL (POP-UP) PARA NOVA TURMA (Invisível por padrão) ===== -->
+    <!-- ===== MODAL (POP-UP) PARA NOVA TURMA (REUTILIZADO PARA EDITAR) ===== -->
     <div id="nova-turma-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold text-gray-800">Criar Nova Turma</h3>
+                <!-- Título dinâmico -->
+                <h3 id="turma-modal-title" class="text-2xl font-bold text-gray-800">Criar Nova Turma</h3>
                 <button id="close-turma-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
                     &times;
                 </button>
             </div>
             <form id="nova-turma-form" class="space-y-4">
+                <!-- Input oculto para guardar o ID em modo de edição -->
+                <input type="hidden" id="turma-edit-id">
                 <div>
                     <label for="turma-nome" class="block text-sm font-medium text-gray-700">Nome da Turma</label>
                     <input type="text" id="turma-nome" name="turma-nome" required placeholder="Ex: Turma 701"
@@ -225,44 +384,265 @@
                            class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div class="pt-4">
-                    <button type="submit"
+                    <!-- Botão dinâmico -->
+                    <button type="submit" id="turma-submit-button"
                             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
-                        Salvar Turma
+                        Salvar
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ===== MODAL (POP-UP) PARA OBSERVAÇÕES (Invisível por padrão) ===== -->
-    <div id="observacoes-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-        <div class="relative top-10 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-2xl bg-white">
-            <!-- Header do Modal de Observações -->
-            <div class="flex justify-between items-center mb-6 pb-4 border-b">
-                <h3 id="observacao-aluno-nome" class="text-2xl font-bold text-gray-800">Observações de...</h3>
-                <button id="close-observacoes-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
+    <!-- ===== MODAL (POP-UP) PARA EDITAR ATIVIDADE ===== -->
+    <div id="edit-atividade-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Editar Atividade</h3>
+                <button id="close-edit-atividade-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    &times;
+                </button>
+            </div>
+            <form id="edit-atividade-form" class="space-y-4">
+                <input type="hidden" id="edit-atividade-id">
+                <div>
+                    <label for="edit-atividade-nome" class="block text-sm font-medium text-gray-700">Nome da Atividade</label>
+                    <input type="text" id="edit-atividade-nome" placeholder="Ex: Prova 1" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="edit-atividade-valor" class="block text-sm font-medium text-gray-700">Valor Máximo</label>
+                    <input type="number" id="edit-atividade-valor" placeholder="Ex: 10" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="pt-4">
+                    <button type="submit"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL (POP-UP) PARA EDITAR PLANO DE AULA ===== -->
+    <div id="edit-plano-aula-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Editar Plano de Aula</h3>
+                <button id="close-edit-plano-aula-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    &times;
+                </button>
+            </div>
+            <form id="edit-plano-aula-form" class="space-y-4">
+                <input type="hidden" id="edit-plano-aula-id">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-grow">
+                        <label for="edit-plano-aula-topico" class="block text-sm font-medium text-gray-700">Tópico da Aula</label>
+                        <input type="text" id="edit-plano-aula-topico" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div class="sm:w-1/3">
+                        <label for="edit-plano-aula-data" class="block text-sm font-medium text-gray-700">Data da Aula</label>
+                        <input type="date" id="edit-plano-aula-data" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                <div>
+                    <label for="edit-plano-aula-detalhes" class="block text-sm font-medium text-gray-700">Tópicos Abordados / Detalhes</label>
+                    <textarea id="edit-plano-aula-detalhes" rows="3" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                </div>
+                <div>
+                    <label for="edit-plano-aula-atividades" class="block text-sm font-medium text-gray-700">Atividades / Tarefas</label>
+                    <textarea id="edit-plano-aula-atividades" rows="2" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                </div>
+                <div class="pt-4">
+                    <button type="submit"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL (POP-UP) PARA DASHBOARD DO ALUNO ===== -->
+    <div id="aluno-dashboard-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-0 border w-full max-w-3xl shadow-lg rounded-2xl bg-white">
+            
+            <!-- Header do Dashboard -->
+            <div class="flex items-start p-5 border-b border-gray-200">
+                <!-- Foto -->
+                <div id="dashboard-aluno-foto" class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 border-4 border-white shadow-md">
+                    <!-- Imagem ou Placeholder inserido pelo JS -->
+                </div>
+                <!-- Infos -->
+                <div class="ml-5 flex-grow">
+                    <h3 id="dashboard-aluno-nome" class="text-2xl font-bold text-gray-800">Carregando...</h3>
+                    <p id="dashboard-aluno-nascimento" class="text-sm text-gray-600 mt-1"></p>
+                    <p class="text-sm text-gray-500 mt-2 font-medium">INFORMAÇÕES GERAIS:</p>
+                    <p id="dashboard-aluno-info-geral" class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded-md max-h-24 overflow-y-auto"></p>
+                </div>
+                <!-- Botões de Ação (Fechar e Editar) -->
+                <div class="flex flex-col items-end">
+                    <button id="close-dashboard-modal-button" class="text-gray-400 hover:text-gray-600 text-3xl font-light -mt-2">
+                        &times;
+                    </button>
+                    <button id="open-edit-aluno-modal-button" class="mt-4 px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm">
+                        <i class="fas fa-edit mr-1"></i> Editar Aluno
+                    </button>
+                </div>
+            </div>
+
+            <!-- Abas do Dashboard (Observações / Desempenho) -->
+            <div class="border-b border-gray-200 bg-gray-50">
+                <nav class="flex space-x-4 px-5 -mb-px">
+                    <button id="dashboard-tab-observacoes" class="dashboard-tab-button active py-4 px-3 border-b-4 text-sm font-medium">
+                        <i class="fas fa-comment-dots mr-2"></i>Observações Diárias
+                    </button>
+                    <button id="dashboard-tab-notas" class="dashboard-tab-button py-4 px-3 border-b-4 text-sm font-medium">
+                        <i class="fas fa-chart-line mr-2"></i>Desempenho (Notas)
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Conteúdo das Abas do Dashboard -->
+            <div class="p-5" style="max-height: 60vh; overflow-y: auto;">
+                <!-- Aba 1: Observações -->
+                <div id="dashboard-content-observacoes">
+                    <!-- Formulário para Nova Observação -->
+                    <form id="dashboard-nova-observacao-form" class="mb-6">
+                        <label for="dashboard-nova-observacao-texto" class="block text-sm font-medium text-gray-700 mb-2">Nova Observação (aula de hoje, etc.):</label>
+                        <textarea id="dashboard-nova-observacao-texto" rows="3" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ex: Participou ativamente na discussão sobre..."></textarea>
+                        <button type="submit"
+                                class="w-full mt-4 flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            Salvar Observação
+                        </button>
+                    </form>
+
+                    <!-- Lista de Observações Anteriores -->
+                    <div>
+                        <h4 class="text-lg font-bold text-gray-700 mb-4">Histórico de Observações</h4>
+                        <p id="dashboard-loading-observacoes" class="text-gray-500">Carregando...</p>
+                        <div id="dashboard-observacoes-list" class="space-y-4">
+                            <!-- Observações serão inseridas aqui pelo JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba 2: Desempenho (Notas) -->
+                <div id="dashboard-content-notas" class="hidden">
+                    <h3 class="text-xl font-bold text-gray-700 mb-4">Desempenho nas Atividades</h3>
+                    <p id="dashboard-loading-notas" class="text-gray-500">Carregando...</p>
+                    <div id="dashboard-notas-list" class="space-y-3">
+                        <!-- Lista de notas/atividades será inserida aqui -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL (POP-UP) PARA EDITAR ALUNO ===== -->
+    <div id="edit-aluno-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-70 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Editar Aluno</h3>
+                <button id="close-edit-aluno-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
                     &times;
                 </button>
             </div>
             
-            <!-- Formulário para Nova Observação -->
-            <form id="nova-observacao-form" class="mb-6">
-                <label for="nova-observacao-texto" class="block text-sm font-medium text-gray-700 mb-2">Nova Observação (aula de hoje, etc.):</label>
-                <textarea id="nova-observacao-texto" rows="3" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ex: Participou ativamente na discussão sobre..."></textarea>
-                <button type="submit"
-                        class="w-full mt-4 flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                    Salvar Observação
+            <form id="edit-aluno-form" class="space-y-4">
+                <input type="hidden" id="edit-aluno-id">
+                <input type="hidden" id="edit-aluno-old-storage-path">
+                
+                <div>
+                    <label for="edit-aluno-nome" class="block text-sm font-medium text-gray-700">Nome do Aluno</label>
+                    <input type="text" id="edit-aluno-nome" placeholder="Nome completo" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="edit-aluno-nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+                    <input type="date" id="edit-aluno-nascimento" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                
+                <!-- Edição da Foto -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Foto Atual</label>
+                    <div id="edit-aluno-foto-preview" class="mt-1 w-20 h-20 rounded-full overflow-hidden bg-gray-200">
+                        <!-- Foto atual ou placeholder -->
+                    </div>
+                    <label for="edit-aluno-foto-input" class="block text-sm font-medium text-gray-700 mt-2">Trocar Foto (opcional)</label>
+                    <input type="file" id="edit-aluno-foto-input" accept="image/*" class="mt-1 block w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-lg file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-indigo-50 file:text-indigo-700
+                        hover:file:bg-indigo-100">
+                </div>
+
+                <div>
+                    <label for="edit-aluno-info-geral" class="block text-sm font-medium text-gray-700">Informações Gerais</label>
+                    <textarea id="edit-aluno-info-geral" rows="3" placeholder="Ex: Alergias, contato dos pais..." class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                </div>
+                
+                <button type="submit" id="submit-edit-aluno-button" class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow">
+                    <i class="fas fa-save mr-2"></i> Salvar Alterações
                 </button>
             </form>
-
-            <!-- Lista de Observações Anteriores -->
-            <div>
-                <h4 class="text-lg font-bold text-gray-700 mb-4">Histórico de Observações</h4>
-                <p id="loading-observacoes" class="text-gray-500">Carregando...</p>
-                <div id="observacoes-list" class="space-y-4 max-h-64 overflow-y-auto pr-2">
-                    <!-- Observações serão inseridas aqui pelo JS -->
-                </div>
+        </div>
+    </div>
+    
+    <!-- ===== MODAL (POP-UP) PARA PERFIL DO USUÁRIO (NOVO) ===== -->
+    <div id="perfil-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-70 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">Meu Perfil</h3>
+                <button id="close-perfil-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    &times;
+                </button>
             </div>
+            
+            <form id="perfil-form" class="space-y-4">
+                <input type="hidden" id="perfil-old-storage-path">
+                
+                <!-- Upload de Foto de Perfil -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Foto de Perfil</label>
+                    <div class="flex items-center gap-4 mt-2">
+                        <div id="perfil-foto-preview" class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-2 border-gray-300">
+                            <!-- Foto atual ou placeholder -->
+                        </div>
+                        <input type="file" id="perfil-foto-input" accept="image/*" class="block w-full text-sm text-gray-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-lg file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-indigo-50 file:text-indigo-700
+                            hover:file:bg-indigo-100">
+                    </div>
+                </div>
+
+                <!-- Nome e Apelido -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="perfil-nome-completo" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                        <input type="text" id="perfil-nome-completo" placeholder="Seu nome" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="perfil-apelido" class="block text-sm font-medium text-gray-700">Apelido</label>
+                        <input type="text" id="perfil-apelido" placeholder="Ex: Profª Ana" required class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="perfil-data-nascimento" class="block text-sm font-medium text-gray-700">Data de Nascimento</label>
+                    <input type="date" id="perfil-data-nascimento" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label for="perfil-email" class="block text-sm font-medium text-gray-700">Email (Login)</label>
+                    <input type="email" id="perfil-email" disabled class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-500">
+                </div>
+                
+                <button type="submit" id="submit-perfil-button" class="w-full px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow">
+                    <i class="fas fa-save mr-2"></i> Salvar Perfil
+                </button>
+            </form>
         </div>
     </div>
 
@@ -295,17 +675,31 @@
             query,
             setLogLevel,
             deleteDoc,
-            serverTimestamp 
+            serverTimestamp,
+            updateDoc,
+            getDoc,
+            setDoc,
+            getDocs 
         } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Importações do Storage
+        import { 
+            getStorage, 
+            ref, 
+            uploadBytes, 
+            getDownloadURL, 
+            deleteObject 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
         // --- Configuração e Inicialização do Firebase ---
         
         let firebaseConfig, appId, initialAuthToken;
 
         try {
+            // Tenta usar as credenciais globais injetadas
             if (typeof __firebase_config !== 'undefined' && __firebase_config !== "{}") {
                 firebaseConfig = JSON.parse(__firebase_config);
             } else {
+                // Fallback para as suas credenciais se não estiver no ambiente
                 firebaseConfig = {
                     apiKey: "AIzaSyBX7l2BT5-J47dP2ztUuHZ98Dm2gqEytzI",
                     authDomain: "painel-do-professor.firebaseapp.com",
@@ -321,6 +715,7 @@
 
         } catch (e) {
             console.error("Erro ao parsear configuração do Firebase:", e);
+            // Fallback em caso de erro no JSON.parse
             firebaseConfig = {
                 apiKey: "AIzaSyBX7l2BT5-J47dP2ztUuHZ98Dm2gqEytzI",
                 authDomain: "painel-do-professor.firebaseapp.com",
@@ -336,16 +731,31 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app); 
         setLogLevel('Debug');
+
+        // --- Ícone Placeholder Padrão (SVG) ---
+        const placeholderIcon = `
+            <svg class="w-full h-full text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+            </svg>
+        `;
 
         // --- Variáveis Globais de Estado ---
         let currentUserId = null;
         let selectedTurmaId = null;
-        let selectedAlunoId = null; 
+        let selectedAlunoId = null;
+        let selectedAtividadeId = null;
+        let isTurmaEditMode = false;
+        let globalPerfilCache = null; // NOVO
+        let listaAlunosCache = []; 
+        let listaAtividadesCache = []; 
         let unsubscribeTurmas = null;
+        let unsubscribePerfil = null; // NOVO
         let unsubscribeAlunos = null;
-        let unsubscribeObservacoes = null;
-        let unsubscribePlanosDeAula = null; // <-- Novo: Para Planos de Aula
+        let unsubscribeDashboardObservacoes = null; 
+        let unsubscribePlanosDeAula = null;
+        let unsubscribeAtividades = null;
 
         // --- Elementos da DOM (Autenticação e App) ---
         const authContainer = document.getElementById('auth-container');
@@ -355,7 +765,8 @@
         const logoutButton = document.getElementById('logout-button');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
-        const userEmailSpan = document.getElementById('user-email');
+        const userGreeting = document.getElementById('user-greeting'); // MODIFICADO
+        const navbarFotoPreview = document.getElementById('navbar-foto-preview'); // NOVO
         const messageBox = document.getElementById('message-box');
 
         // --- Elementos da DOM (Lista de Turmas) ---
@@ -363,31 +774,97 @@
         const turmasList = document.getElementById('turmas-list');
         const loadingTurmas = document.getElementById('loading-turmas');
         
-        // --- Elementos da DOM (Modal Nova Turma) ---
+        // --- Elementos da DOM (Modal Nova Turma / Editar) ---
         const novaTurmaModal = document.getElementById('nova-turma-modal');
         const showTurmaModalButton = document.getElementById('show-turma-modal-button');
         const closeTurmaModalButton = document.getElementById('close-turma-modal-button');
         const novaTurmaForm = document.getElementById('nova-turma-form');
+        const turmaModalTitle = document.getElementById('turma-modal-title');
+        const turmaEditId = document.getElementById('turma-edit-id');
         const turmaNomeInput = document.getElementById('turma-nome');
         const turmaMateriaInput = document.getElementById('turma-materia');
+        const turmaSubmitButton = document.getElementById('turma-submit-button');
         
+        // --- Elementos da DOM (Modal Editar Atividade) ---
+        const editAtividadeModal = document.getElementById('edit-atividade-modal');
+        const closeEditAtividadeModalButton = document.getElementById('close-edit-atividade-modal-button');
+        const editAtividadeForm = document.getElementById('edit-atividade-form');
+        const editAtividadeId = document.getElementById('edit-atividade-id');
+        const editAtividadeNome = document.getElementById('edit-atividade-nome');
+        const editAtividadeValor = document.getElementById('edit-atividade-valor');
+        
+        // --- Elementos da DOM (Modal Editar Plano de Aula) ---
+        const editPlanoAulaModal = document.getElementById('edit-plano-aula-modal');
+        const closeEditPlanoAulaModalButton = document.getElementById('close-edit-plano-aula-modal-button');
+        const editPlanoAulaForm = document.getElementById('edit-plano-aula-form');
+        const editPlanoAulaId = document.getElementById('edit-plano-aula-id');
+        const editPlanoAulaTopico = document.getElementById('edit-plano-aula-topico');
+        const editPlanoAulaData = document.getElementById('edit-plano-aula-data');
+        const editPlanoAulaDetalhes = document.getElementById('edit-plano-aula-detalhes');
+        const editPlanoAulaAtividades = document.getElementById('edit-plano-aula-atividades');
+
+
+        // --- Elementos da DOM (Modal Editar Aluno) ---
+        const editAlunoModal = document.getElementById('edit-aluno-modal');
+        const closeEditAlunoModalButton = document.getElementById('close-edit-aluno-modal-button');
+        const editAlunoForm = document.getElementById('edit-aluno-form');
+        const editAlunoId = document.getElementById('edit-aluno-id');
+        const editAlunoOldStoragePath = document.getElementById('edit-aluno-old-storage-path');
+        const editAlunoNome = document.getElementById('edit-aluno-nome');
+        const editAlunoNascimento = document.getElementById('edit-aluno-nascimento');
+        const editAlunoFotoPreview = document.getElementById('edit-aluno-foto-preview');
+        const editAlunoFotoInput = document.getElementById('edit-aluno-foto-input');
+        const editAlunoInfoGeral = document.getElementById('edit-aluno-info-geral');
+        const submitEditAlunoButton = document.getElementById('submit-edit-aluno-button');
+        
+        // --- Elementos da DOM (Modal Perfil do Usuário - NOVO) ---
+        const perfilModal = document.getElementById('perfil-modal');
+        const openPerfilModalButton = document.getElementById('open-perfil-modal-button');
+        const closePerfilModalButton = document.getElementById('close-perfil-modal-button');
+        const perfilForm = document.getElementById('perfil-form');
+        const perfilOldStoragePath = document.getElementById('perfil-old-storage-path');
+        const perfilFotoPreview = document.getElementById('perfil-foto-preview');
+        const perfilFotoInput = document.getElementById('perfil-foto-input');
+        const perfilNomeCompleto = document.getElementById('perfil-nome-completo');
+        const perfilApelido = document.getElementById('perfil-apelido');
+        const perfilDataNascimento = document.getElementById('perfil-data-nascimento');
+        const perfilEmail = document.getElementById('perfil-email');
+        const submitPerfilButton = document.getElementById('submit-perfil-button');
+
+
         // --- Elementos da DOM (Detalhe da Turma) ---
         const turmaDetalheContainer = document.getElementById('turma-detalhe-container');
         const voltarTurmasButton = document.getElementById('voltar-turmas-button');
         const turmaDetalheNome = document.getElementById('turma-detalhe-nome');
+        const muralAvisosTextarea = document.getElementById('mural-avisos-textarea');
+        const salvarMuralButton = document.getElementById('salvar-mural-button');
 
         // --- Elementos da DOM (Abas) ---
         const tabAlunos = document.getElementById('tab-alunos');
+        const tabFrequencia = document.getElementById('tab-frequencia'); 
         const tabPlanoAula = document.getElementById('tab-plano-aula');
+        const tabNotas = document.getElementById('tab-notas'); 
         const alunosContent = document.getElementById('alunos-content');
+        const frequenciaContent = document.getElementById('frequencia-content'); 
         const planoAulaContent = document.getElementById('plano-aula-content');
+        const notasContent = document.getElementById('notas-content');
 
         // --- Elementos da DOM (Aba Alunos) ---
         const novoAlunoForm = document.getElementById('novo-aluno-form');
         const alunoNomeInput = document.getElementById('aluno-nome');
-        const alunoMatriculaInput = document.getElementById('aluno-matricula');
+        const alunoNascimentoInput = document.getElementById('aluno-nascimento');
+        const alunoFotoInput = document.getElementById('aluno-foto-input'); 
+        const alunoInfoGeralInput = document.getElementById('aluno-info-geral');
+        const submitAlunoButton = document.getElementById('submit-aluno-button');
         const alunosList = document.getElementById('alunos-list');
         const loadingAlunos = document.getElementById('loading-alunos');
+
+        // --- Elementos da DOM (Aba Frequência) ---
+        const frequenciaDataInput = document.getElementById('frequencia-data-input');
+        const carregarFrequenciaButton = document.getElementById('carregar-frequencia-button');
+        const frequenciaAlunosList = document.getElementById('frequencia-alunos-list');
+        const loadingFrequencia = document.getElementById('loading-frequencia');
+        const salvarFrequenciaButton = document.getElementById('salvar-frequencia-button');
 
         // --- Elementos da DOM (Aba Plano de Aula) ---
         const novoPlanoAulaForm = document.getElementById('novo-plano-aula-form');
@@ -398,15 +875,42 @@
         const loadingPlanosAula = document.getElementById('loading-planos-aula');
         const planoAulaList = document.getElementById('plano-aula-list');
 
+        // --- Elementos da DOM (Aba Atividades & Notas) ---
+        const notasListaAtividades = document.getElementById('notas-lista-atividades');
+        const exportarCSVButton = document.getElementById('exportar-csv-button'); 
+        const novaAtividadeForm = document.getElementById('nova-atividade-form');
+        const novaAtividadeNome = document.getElementById('nova-atividade-nome');
+        const novaAtividadeValor = document.getElementById('nova-atividade-valor');
+        const loadingAtividades = document.getElementById('loading-atividades');
+        const atividadesList = document.getElementById('atividades-list');
+        
+        // --- Elementos da DOM (Sub-tela Lançamento de Notas) ---
+        const notasLancamentoContainer = document.getElementById('notas-lancamento-container');
+        const voltarAtividadesButton = document.getElementById('voltar-atividades-button');
+        const lancamentoAtividadeNome = document.getElementById('lancamento-atividade-nome');
+        const lancamentoAlunosList = document.getElementById('lancamento-alunos-list');
+        const loadingLancamentoAlunos = document.getElementById('loading-lancamento-alunos');
+        const salvarNotasButton = document.getElementById('salvar-notas-button');
 
-        // --- Elementos da DOM (Modal Observações) ---
-        const observacoesModal = document.getElementById('observacoes-modal');
-        const closeObservacoesModalButton = document.getElementById('close-observacoes-modal-button');
-        const observacaoAlunoNome = document.getElementById('observacao-aluno-nome');
-        const novaObservacaoForm = document.getElementById('nova-observacao-form');
-        const novaObservacaoTexto = document.getElementById('nova-observacao-texto');
-        const observacoesList = document.getElementById('observacoes-list');
-        const loadingObservacoes = document.getElementById('loading-observacoes');
+
+        // --- Elementos da DOM (Modal Dashboard Aluno) ---
+        const alunoDashboardModal = document.getElementById('aluno-dashboard-modal');
+        const closeDashboardModalButton = document.getElementById('close-dashboard-modal-button');
+        const openEditAlunoModalButton = document.getElementById('open-edit-aluno-modal-button'); 
+        const dashboardAlunoFoto = document.getElementById('dashboard-aluno-foto');
+        const dashboardAlunoNome = document.getElementById('dashboard-aluno-nome');
+        const dashboardAlunoNascimento = document.getElementById('dashboard-aluno-nascimento');
+        const dashboardAlunoInfoGeral = document.getElementById('dashboard-aluno-info-geral');
+        const dashboardTabObservacoes = document.getElementById('dashboard-tab-observacoes');
+        const dashboardTabNotas = document.getElementById('dashboard-tab-notas');
+        const dashboardContentObservacoes = document.getElementById('dashboard-content-observacoes');
+        const dashboardContentNotas = document.getElementById('dashboard-content-notas');
+        const dashboardNovaObservacaoForm = document.getElementById('dashboard-nova-observacao-form');
+        const dashboardNovaObservacaoTexto = document.getElementById('dashboard-nova-observacao-texto');
+        const dashboardLoadingObservacoes = document.getElementById('dashboard-loading-observacoes');
+        const dashboardObservacoesList = document.getElementById('dashboard-observacoes-list');
+        const dashboardLoadingNotas = document.getElementById('dashboard-loading-notas');
+        const dashboardNotasList = document.getElementById('dashboard-notas-list');
 
 
         // --- Funções Auxiliares ---
@@ -418,95 +922,306 @@
             setTimeout(() => { messageBox.classList.add('hidden'); }, 3000);
         }
 
+        function formatarData(dataString) {
+            if (!dataString) return 'Data não informada';
+            try {
+                const [ano, mes, dia] = dataString.split('-');
+                return `${dia}/${mes}/${ano}`;
+            } catch (e) { return dataString; }
+        }
+        
+        function getTodayDateString() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+
         // --- Controle do Modal (Turma) ---
 
-        function openModal() { novaTurmaModal.classList.remove('hidden'); }
-        function closeModal() {
+        function openTurmaModal(turma = null) {
+            if (turma) {
+                isTurmaEditMode = true;
+                turmaModalTitle.textContent = "Editar Turma";
+                turmaNomeInput.value = turma.nome;
+                turmaMateriaInput.value = turma.materia;
+                turmaEditId.value = turma.id;
+                turmaSubmitButton.textContent = "Salvar Alterações";
+            } else {
+                isTurmaEditMode = false;
+                turmaModalTitle.textContent = "Criar Nova Turma";
+                novaTurmaForm.reset();
+                turmaSubmitButton.textContent = "Salvar Turma";
+            }
+            novaTurmaModal.classList.remove('hidden');
+        }
+        function closeTurmaModal() {
             novaTurmaModal.classList.add('hidden');
             novaTurmaForm.reset();
+            isTurmaEditMode = false;
         }
-        showTurmaModalButton.addEventListener('click', openModal);
-        closeTurmaModalButton.addEventListener('click', closeModal);
+        showTurmaModalButton.addEventListener('click', () => openTurmaModal(null)); 
+        closeTurmaModalButton.addEventListener('click', closeTurmaModal);
 
-        // --- Controle do Modal (Observações) ---
+        // --- Controle do Modal (Editar Atividade) ---
 
-        function showObservacoesModal(alunoId, alunoNome) {
+        function openEditAtividadeModal(atividade) {
+            if (!atividade) return;
+            editAtividadeId.value = atividade.id;
+            editAtividadeNome.value = atividade.nome;
+            editAtividadeValor.value = atividade.valorMaximo;
+            editAtividadeModal.classList.remove('hidden');
+        }
+        function closeEditAtividadeModal() {
+            editAtividadeModal.classList.add('hidden');
+            editAtividadeForm.reset();
+        }
+        closeEditAtividadeModalButton.addEventListener('click', closeEditAtividadeModal);
+        
+        // --- Controle do Modal (Editar Plano de Aula) ---
+        
+        function openEditPlanoAulaModal(plano) {
+            if (!plano) return;
+            editPlanoAulaId.value = plano.id;
+            editPlanoAulaTopico.value = plano.topicoAula;
+            editPlanoAulaData.value = plano.dataAula;
+            editPlanoAulaDetalhes.value = plano.detalhes;
+            editPlanoAulaAtividades.value = plano.atividades;
+            editPlanoAulaModal.classList.remove('hidden');
+        }
+        function closeEditPlanoAulaModal() {
+            editPlanoAulaModal.classList.add('hidden');
+            editPlanoAulaForm.reset();
+        }
+        closeEditPlanoAulaModalButton.addEventListener('click', closeEditPlanoAulaModal);
+
+
+        // --- Controle do Modal (Editar Aluno) ---
+        
+        function openEditAlunoModal(alunoId) {
+            const aluno = listaAlunosCache.find(a => a.id === alunoId);
+            if (!aluno) return;
+
+            editAlunoId.value = aluno.id;
+            editAlunoOldStoragePath.value = aluno.fotoStoragePath || '';
+            editAlunoNome.value = aluno.nome;
+            editAlunoNascimento.value = aluno.dataNascimento;
+            editAlunoInfoGeral.value = aluno.infoGeral;
+            
+            editAlunoFotoPreview.innerHTML = '';
+            if (aluno.fotoUrl) {
+                editAlunoFotoPreview.innerHTML = `<img src="${aluno.fotoUrl}" alt="${aluno.nome}" class="w-full h-full object-cover">`;
+            } else {
+                editAlunoFotoPreview.innerHTML = placeholderIcon;
+            }
+            
+            editAlunoModal.classList.remove('hidden');
+        }
+        function closeEditAlunoModal() {
+            editAlunoModal.classList.add('hidden');
+            editAlunoForm.reset();
+        }
+        closeEditAlunoModalButton.addEventListener('click', closeEditAlunoModal);
+        
+        
+        // --- Controle do Modal (Perfil do Usuário - NOVO) ---
+        
+        function openPerfilModal() {
+            if (!auth.currentUser) return;
+            
+            // Preenche com o cache global
+            if (globalPerfilCache) {
+                perfilNomeCompleto.value = globalPerfilCache.nomeCompleto || '';
+                perfilApelido.value = globalPerfilCache.apelido || '';
+                perfilDataNascimento.value = globalPerfilCache.dataNascimento || '';
+                perfilOldStoragePath.value = globalPerfilCache.fotoStoragePath || '';
+                
+                perfilFotoPreview.innerHTML = '';
+                if (globalPerfilCache.fotoUrl) {
+                    perfilFotoPreview.innerHTML = `<img src="${globalPerfilCache.fotoUrl}" alt="Foto de Perfil" class="w-full h-full object-cover">`;
+                } else {
+                    perfilFotoPreview.innerHTML = placeholderIcon;
+                }
+            } else {
+                perfilForm.reset();
+                perfilFotoPreview.innerHTML = placeholderIcon;
+            }
+            
+            // Sempre preenche o email (que está desabilitado)
+            perfilEmail.value = auth.currentUser.email;
+            
+            perfilModal.classList.remove('hidden');
+        }
+        
+        function closePerfilModal() {
+            perfilModal.classList.add('hidden');
+            perfilForm.reset();
+        }
+        openPerfilModalButton.addEventListener('click', openPerfilModal);
+        closePerfilModalButton.addEventListener('click', closePerfilModal);
+
+
+        // --- Controle do Modal (Dashboard Aluno) ---
+
+        function showAlunoDashboard(alunoId) {
+            const aluno = listaAlunosCache.find(a => a.id === alunoId);
+            if (!aluno) return;
+
             selectedAlunoId = alunoId; 
-            observacaoAlunoNome.textContent = `Observações de ${alunoNome}`;
-            observacoesModal.classList.remove('hidden');
-            loadingObservacoes.classList.remove('hidden'); 
-            observacoesList.innerHTML = '';
-            carregarObservacoes(); 
+            
+            dashboardAlunoNome.textContent = aluno.nome;
+            dashboardAlunoNascimento.textContent = `Nascimento: ${formatarData(aluno.dataNascimento)}`;
+            dashboardAlunoInfoGeral.textContent = aluno.infoGeral || 'Nenhuma informação geral registrada.';
+            
+            dashboardAlunoFoto.innerHTML = ''; 
+            if (aluno.fotoUrl) {
+                dashboardAlunoFoto.innerHTML = `<img src="${aluno.fotoUrl}" alt="${aluno.nome}" class="w-full h-full object-cover">`;
+            } else {
+                dashboardAlunoFoto.innerHTML = placeholderIcon;
+            }
+            
+            alunoDashboardModal.classList.remove('hidden');
+            switchDashboardTab('observacoes');
+            carregarDashboardObservacoes();
+            carregarDashboardNotas();
         }
+        
+        openEditAlunoModalButton.addEventListener('click', () => {
+            if (selectedAlunoId) {
+                openEditAlunoModal(selectedAlunoId);
+            }
+        });
 
-        function closeObservacoesModal() {
-            observacoesModal.classList.add('hidden');
-            novaObservacaoForm.reset(); 
+        function closeAlunoDashboard() {
+            alunoDashboardModal.classList.add('hidden');
             selectedAlunoId = null; 
             
-            if (unsubscribeObservacoes) {
-                unsubscribeObservacoes();
-                unsubscribeObservacoes = null;
+            if (unsubscribeDashboardObservacoes) {
+                unsubscribeDashboardObservacoes();
+                unsubscribeDashboardObservacoes = null;
             }
         }
-        closeObservacoesModalButton.addEventListener('click', closeObservacoesModal);
+        closeDashboardModalButton.addEventListener('click', closeAlunoDashboard);
+
+        dashboardTabObservacoes.addEventListener('click', () => switchDashboardTab('observacoes'));
+        dashboardTabNotas.addEventListener('click', () => switchDashboardTab('notas'));
+
+        function switchDashboardTab(tab) {
+            dashboardTabObservacoes.classList.toggle('active', tab === 'observacoes');
+            dashboardTabNotas.classList.toggle('active', tab === 'notas');
+            
+            dashboardContentObservacoes.classList.toggle('hidden', tab !== 'observacoes');
+            dashboardContentNotas.classList.toggle('hidden', tab !== 'notas');
+        }
 
 
         // --- Lógica de Navegação (Roteamento e Abas) ---
 
-        function showTurmaDetalhe(turmaId, turmaNome) {
+        async function showTurmaDetalhe(turmaId, turmaNome) { 
             selectedTurmaId = turmaId;
             turmaDetalheNome.textContent = turmaNome;
             turmasListContainer.classList.add('hidden');
             turmaDetalheContainer.classList.remove('hidden');
             
-            // Define a aba "Alunos" como padrão ao abrir
+            muralAvisosTextarea.value = '';
+
+            if (currentUserId && selectedTurmaId) {
+                try {
+                    const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}`;
+                    const turmaDoc = await getDoc(doc(db, docPath));
+                    if (turmaDoc.exists()) {
+                        muralAvisosTextarea.value = turmaDoc.data().muralAvisos || '';
+                    }
+                } catch (error) {
+                    console.error("Erro ao carregar mural: ", error);
+                    showMessage("Erro ao carregar o mural de avisos.", "error");
+                }
+            }
+            
             switchTab('alunos');
-            carregarAlunos();
-            carregarPlanosDeAula(); // Carrega os planos em segundo plano
+            carregarAlunos(); 
+            carregarPlanosDeAula();
+            carregarAtividades(); 
         }
 
         function showTurmasList() {
             turmaDetalheContainer.classList.add('hidden');
             turmasListContainer.classList.remove('hidden');
             selectedTurmaId = null;
+            listaAlunosCache = []; 
+            listaAtividadesCache = []; 
             
-            // Limpa todos os listeners da turma
             if (unsubscribeAlunos) unsubscribeAlunos();
-            if (unsubscribeObservacoes) unsubscribeObservacoes();
+            if (unsubscribeDashboardObservacoes) unsubscribeDashboardObservacoes(); 
             if (unsubscribePlanosDeAula) unsubscribePlanosDeAula();
+            if (unsubscribeAtividades) unsubscribeAtividades();
         }
         voltarTurmasButton.addEventListener('click', showTurmasList);
 
-        // Lógica de clique nas Abas
+        salvarMuralButton.addEventListener('click', async () => {
+            if (!currentUserId || !selectedTurmaId) return;
+
+            const texto = muralAvisosTextarea.value;
+            salvarMuralButton.disabled = true;
+            salvarMuralButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}`;
+                await updateDoc(doc(db, docPath), {
+                    muralAvisos: texto
+                });
+                showMessage("Mural salvo com sucesso!", "success");
+            } catch (error) {
+                showMessage("Erro ao salvar o mural.", "error");
+            } finally {
+                salvarMuralButton.disabled = false;
+                salvarMuralButton.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Mural';
+            }
+        });
+
+
         tabAlunos.addEventListener('click', () => switchTab('alunos'));
+        tabFrequencia.addEventListener('click', () => switchTab('frequencia')); 
         tabPlanoAula.addEventListener('click', () => switchTab('plano-aula'));
+        tabNotas.addEventListener('click', () => switchTab('notas'));
 
         function switchTab(tab) {
-            if (tab === 'alunos') {
-                tabAlunos.classList.add('active');
-                tabPlanoAula.classList.remove('active');
-                alunosContent.classList.remove('hidden');
-                planoAulaContent.classList.add('hidden');
-            } else if (tab === 'plano-aula') {
-                tabAlunos.classList.remove('active');
-                tabPlanoAula.classList.add('active');
-                alunosContent.classList.add('hidden');
-                planoAulaContent.classList.remove('hidden');
+            tabAlunos.classList.toggle('active', tab === 'alunos');
+            tabFrequencia.classList.toggle('active', tab === 'frequencia'); 
+            tabPlanoAula.classList.toggle('active', tab === 'plano-aula');
+            tabNotas.classList.toggle('active', tab === 'notas');
+            
+            alunosContent.classList.toggle('hidden', tab !== 'alunos');
+            frequenciaContent.classList.toggle('hidden', tab !== 'frequencia'); 
+            planoAulaContent.classList.toggle('hidden', tab !== 'plano-aula');
+            notasContent.classList.toggle('hidden', tab !== 'notas');
+            
+            if (tab === 'notas') {
+                showAtividadesList();
+            }
+            
+            if (tab === 'frequencia') {
+                frequenciaDataInput.value = getTodayDateString(); 
+                frequenciaAlunosList.innerHTML = '<p class="text-gray-500 text-center">Selecione uma data e clique em "Carregar Dia".</p>';
+                loadingFrequencia.classList.add('hidden');
+                salvarFrequenciaButton.classList.add('hidden');
             }
         }
 
-        // --- Lógica de Autenticação ---
+        // --- Lógica de Autenticação (MODIFICADA) ---
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserId = user.uid;
-                userEmailSpan.textContent = user.email;
+                // userEmailSpan.textContent = user.email; // Removido, agora é dinâmico
                 authContainer.classList.add('hidden');
                 appContainer.classList.remove('hidden');
                 
                 showTurmasList();
                 carregarTurmas();
+                carregarPerfil(); // NOVO: Carrega o perfil do usuário
 
             } else {
                 currentUserId = null;
@@ -514,7 +1229,14 @@
                 appContainer.classList.add('hidden');
                 
                 if (unsubscribeTurmas) unsubscribeTurmas();
-                showTurmasList(); // Garante que limpa todos os listeners
+                if (unsubscribePerfil) unsubscribePerfil(); // NOVO: Limpa o listener do perfil
+                
+                // Limpa a UI da navbar no logout
+                userGreeting.textContent = "Carregando...";
+                navbarFotoPreview.innerHTML = placeholderIcon;
+                globalPerfilCache = null;
+                
+                showTurmasList(); 
             }
         });
 
@@ -564,6 +1286,95 @@
                 showMessage("Erro ao tentar sair.", "error");
             }
         });
+        
+        // --- Lógica do Firestore (Perfil do Usuário - NOVO) ---
+        
+        function carregarPerfil() {
+            if (!currentUserId) return;
+            
+            if (unsubscribePerfil) unsubscribePerfil();
+            
+            const docPath = `perfis/${currentUserId}`;
+            unsubscribePerfil = onSnapshot(doc(db, docPath), (snapshot) => {
+                if (snapshot.exists()) {
+                    globalPerfilCache = snapshot.data();
+                    const apelido = globalPerfilCache.apelido || globalPerfilCache.nomeCompleto;
+                    
+                    userGreeting.textContent = `Prof. ${apelido || 'Prof'}`;
+                    
+                    navbarFotoPreview.innerHTML = '';
+                    if (globalPerfilCache.fotoUrl) {
+                        navbarFotoPreview.innerHTML = `<img src="${globalPerfilCache.fotoUrl}" alt="Foto" class="w-full h-full object-cover">`;
+                    } else {
+                        navbarFotoPreview.innerHTML = placeholderIcon;
+                    }
+                    
+                } else {
+                    // Perfil ainda não existe
+                    globalPerfilCache = {};
+                    userGreeting.textContent = "Olá! (Configure seu perfil)";
+                    navbarFotoPreview.innerHTML = placeholderIcon;
+                }
+            }, (error) => {
+                console.error("Erro ao carregar perfil: ", error);
+                showMessage("Erro ao carregar seu perfil.", "error");
+            });
+        }
+        
+        perfilForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId || !auth.currentUser) return;
+            
+            const docPath = `perfis/${currentUserId}`;
+            
+            submitPerfilButton.disabled = true;
+            submitPerfilButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+
+            const file = perfilFotoInput.files[0];
+            const oldStoragePath = perfilOldStoragePath.value;
+
+            try {
+                // 1. Salva os dados de texto
+                const dadosPerfil = {
+                    nomeCompleto: perfilNomeCompleto.value,
+                    apelido: perfilApelido.value,
+                    dataNascimento: perfilDataNascimento.value || "",
+                    email: auth.currentUser.email // Sempre atualiza com o email de login
+                };
+                // setDoc com merge: true cria o doc se não existir, ou atualiza se existir
+                await setDoc(doc(db, docPath), dadosPerfil, { merge: true });
+
+                // 2. Se houver uma nova foto, faz o upload
+                if (file) {
+                    const newStoragePath = `usuarios/${currentUserId}/foto_perfil/${file.name}`;
+                    const storageRef = ref(storage, newStoragePath);
+                    const uploadSnapshot = await uploadBytes(storageRef, file);
+                    const newDownloadURL = await getDownloadURL(uploadSnapshot.ref);
+                    
+                    // Atualiza o doc com as URLs da nova foto
+                    await setDoc(doc(db, docPath), {
+                        fotoUrl: newDownloadURL,
+                        fotoStoragePath: newStoragePath
+                    }, { merge: true });
+
+                    // 3. Se tinha uma foto antiga, exclui ela
+                    if (oldStoragePath && oldStoragePath !== newStoragePath) {
+                        const oldFotoRef = ref(storage, oldStoragePath);
+                        await deleteObject(oldFotoRef);
+                    }
+                }
+                
+                showMessage("Perfil atualizado com sucesso!", "success");
+                closePerfilModal();
+
+            } catch (error) {
+                console.error("Erro ao salvar perfil: ", error);
+                showMessage("Erro ao salvar seu perfil.", "error");
+            } finally {
+                submitPerfilButton.disabled = false;
+                submitPerfilButton.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Perfil';
+            }
+        });
 
 
         // --- Lógica do Firestore (Turmas) ---
@@ -594,16 +1405,24 @@
                             <h3 class="text-xl font-bold text-indigo-700">${turma.nome}</h3>
                             <p class="text-gray-600 mt-2">${turma.materia}</p>
                         </div>
-                        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-end">
-                            <button data-id="${turmaId}" class="delete-turma-button text-red-500 hover:text-red-700 text-sm font-medium">
+                        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-end gap-3">
+                            <button class="edit-turma-button text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                <i class="fas fa-edit mr-1"></i> Editar
+                            </button>
+                            <button class="delete-turma-button text-red-500 hover:text-red-700 text-sm font-medium">
                                 <i class="fas fa-trash mr-1"></i> Excluir
                             </button>
                         </div>
                     `;
                     
                     turmaCard.addEventListener('click', (e) => {
-                        if (e.target.closest('.delete-turma-button')) return;
+                        if (e.target.closest('button')) return;
                         showTurmaDetalhe(turmaId, turma.nome);
+                    });
+
+                    turmaCard.querySelector('.edit-turma-button').addEventListener('click', (e) => {
+                        e.stopPropagation(); 
+                        openTurmaModal({ id: turmaId, ...turma });
                     });
 
                     turmaCard.querySelector('.delete-turma-button').addEventListener('click', (e) => {
@@ -619,15 +1438,32 @@
         novaTurmaForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUserId) return;
+
+            const nome = turmaNomeInput.value;
+            const materia = turmaMateriaInput.value;
+            
             try {
-                const collectionPath = `usuarios/${currentUserId}/turmas`;
-                await addDoc(collection(db, collectionPath), {
-                    nome: turmaNomeInput.value,
-                    materia: turmaMateriaInput.value,
-                });
-                showMessage("Turma criada com sucesso!", "success");
-                closeModal();
-            } catch (error) { showMessage("Erro ao salvar a turma.", "error"); }
+                if (isTurmaEditMode) {
+                    const docId = turmaEditId.value;
+                    const docPath = `usuarios/${currentUserId}/turmas/${docId}`;
+                    await updateDoc(doc(db, docPath), {
+                        nome: nome,
+                        materia: materia
+                    });
+                    showMessage("Turma atualizada com sucesso!", "success");
+                } else {
+                    const collectionPath = `usuarios/${currentUserId}/turmas`;
+                    await addDoc(collection(db, collectionPath), {
+                        nome: nome,
+                        materia: materia,
+                        muralAvisos: "" 
+                    });
+                    showMessage("Turma criada com sucesso!", "success");
+                }
+                closeTurmaModal();
+            } catch (error) { 
+                showMessage("Erro ao salvar a turma.", "error"); 
+            }
         });
 
         async function handleDeleteTurma(turmaId, turmaNome) {
@@ -646,7 +1482,7 @@
         function carregarAlunos() {
             if (!currentUserId || !selectedTurmaId) return;
 
-            loadingAlunos.classList.remove('hidden'); // Mostra o loading ao carregar
+            loadingAlunos.classList.remove('hidden'); 
             alunosList.innerHTML = '';
 
             const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos`;
@@ -655,42 +1491,53 @@
             if (unsubscribeAlunos) unsubscribeAlunos();
             unsubscribeAlunos = onSnapshot(q, (snapshot) => {
                 loadingAlunos.classList.add('hidden');
-                alunosList.innerHTML = '';
+                
+                const alunos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                alunos.sort((a, b) => a.nome.localeCompare(b.nome));
+                listaAlunosCache = alunos; 
 
-                if (snapshot.empty) {
+                alunosList.innerHTML = '';
+                if (alunos.length === 0) {
                     alunosList.innerHTML = '<p class="text-gray-500 text-center">Nenhum aluno cadastrado nesta turma.</p>';
                     return;
                 }
 
-                snapshot.forEach((doc) => {
-                    const aluno = doc.data();
-                    const alunoId = doc.id;
-
+                alunos.forEach((aluno) => {
                     const alunoCard = document.createElement('div');
-                    alunoCard.className = "flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-gray-50 p-4 rounded-lg shadow-sm";
-                    alunoCard.innerHTML = `
-                        <div>
-                            <p class="font-bold text-gray-800">${aluno.nome}</p>
-                            <p class="text-sm text-gray-600">${aluno.matricula || 'Sem matrícula'}</p>
-                        </div>
-                        <div class="flex gap-2 flex-shrink-0">
-                            <button data-id="${alunoId}" class="observacoes-aluno-button px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm">
-                                <i class="fas fa-comment-dots mr-1"></i> Observações
-                            </button>
-                            <button data-id="${alunoId}" class="delete-aluno-button px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
+                    alunoCard.className = "flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50 p-4 rounded-lg shadow-sm";
+                    
+                    const imgContainer = document.createElement('div');
+                    imgContainer.className = "w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 cursor-pointer";
+                    if (aluno.fotoUrl) {
+                        imgContainer.innerHTML = `<img src="${aluno.fotoUrl}" alt="${aluno.nome}" class="w-full h-full object-cover">`;
+                    } else {
+                        imgContainer.innerHTML = placeholderIcon;
+                    }
+                    imgContainer.addEventListener('click', () => showAlunoDashboard(aluno.id));
+
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = "flex-grow cursor-pointer";
+                    infoDiv.innerHTML = `
+                        <p class="font-bold text-gray-800">${aluno.nome}</p>
+                        <p class="text-sm text-gray-600">${formatarData(aluno.dataNascimento)}</p>
+                        ${aluno.infoGeral ? `<p class="text-sm text-gray-500 mt-1 truncate">${aluno.infoGeral}</p>` : ''}
                     `;
-
-                    alunoCard.querySelector('.observacoes-aluno-button').addEventListener('click', () => {
-                        showObservacoesModal(alunoId, aluno.nome);
+                    infoDiv.addEventListener('click', () => showAlunoDashboard(aluno.id));
+                    
+                    const buttonsDiv = document.createElement('div');
+                    buttonsDiv.className = "flex gap-2 flex-shrink-0";
+                    buttonsDiv.innerHTML = `
+                        <button class="delete-aluno-button px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    buttonsDiv.querySelector('.delete-aluno-button').addEventListener('click', () => {
+                        handleDeleteAluno(aluno.id, aluno.nome, aluno.fotoStoragePath);
                     });
-
-                    alunoCard.querySelector('.delete-aluno-button').addEventListener('click', () => {
-                        handleDeleteAluno(alunoId, aluno.nome);
-                    });
-
+                    
+                    alunoCard.appendChild(imgContainer);
+                    alunoCard.appendChild(infoDiv);
+                    alunoCard.appendChild(buttonsDiv);
                     alunosList.appendChild(alunoCard);
                 });
             }, (error) => { showMessage("Erro ao carregar alunos.", "error"); });
@@ -699,49 +1546,164 @@
         novoAlunoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUserId || !selectedTurmaId) return;
+            
+            submitAlunoButton.disabled = true;
+            submitAlunoButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+
             const nome = alunoNomeInput.value;
+            const dataNascimento = alunoNascimentoInput.value;
+            const infoGeral = alunoInfoGeralInput.value;
+            const file = alunoFotoInput.files[0];
+
             if (!nome) {
                 showMessage("O nome do aluno é obrigatório.", "error");
+                submitAlunoButton.disabled = false;
+                submitAlunoButton.innerHTML = '<i class="fas fa-plus mr-2"></i> Adicionar Aluno';
                 return;
             }
+
             try {
                 const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos`;
-                await addDoc(collection(db, collectionPath), {
+                const alunoDocRef = await addDoc(collection(db, collectionPath), {
                     nome: nome,
-                    matricula: alunoMatriculaInput.value || ""
+                    dataNascimento: dataNascimento || "",
+                    infoGeral: infoGeral || "",
+                    fotoUrl: "",
+                    fotoStoragePath: "",
+                    criadoEm: serverTimestamp()
                 });
-                showMessage("Aluno adicionado!", "success");
+                
+                const newAlunoId = alunoDocRef.id;
+
+                if (file) {
+                    const storagePath = `usuarios/${currentUserId}/fotos_alunos/${newAlunoId}/${file.name}`;
+                    const storageRef = ref(storage, storagePath);
+                    const uploadSnapshot = await uploadBytes(storageRef, file);
+                    const downloadURL = await getDownloadURL(uploadSnapshot.ref);
+
+                    await updateDoc(alunoDocRef, {
+                        fotoUrl: downloadURL,
+                        fotoStoragePath: storagePath
+                    });
+                }
+
+                showMessage("Aluno adicionado com sucesso!", "success");
                 novoAlunoForm.reset();
-            } catch (error) { showMessage("Erro ao salvar o aluno.", "error"); }
+            } catch (error) {
+                console.error("Erro ao salvar aluno: ", error);
+                showMessage("Erro ao salvar o aluno.", "error");
+            } finally {
+                submitAlunoButton.disabled = false;
+                submitAlunoButton.innerHTML = '<i class="fas fa-plus mr-2"></i> Adicionar Aluno';
+            }
         });
 
-        async function handleDeleteAluno(alunoId, alunoNome) {
+        editAlunoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId || !selectedTurmaId) return;
+
+            const alunoId = editAlunoId.value;
+            const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos/${alunoId}`;
+            
+            submitEditAlunoButton.disabled = true;
+            submitEditAlunoButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+
+            const file = editAlunoFotoInput.files[0];
+            const oldStoragePath = editAlunoOldStoragePath.value;
+
+            try {
+                const dadosAtualizados = {
+                    nome: editAlunoNome.value,
+                    dataNascimento: editAlunoNascimento.value || "",
+                    infoGeral: editAlunoInfoGeral.value || ""
+                };
+                await updateDoc(doc(db, docPath), dadosAtualizados);
+
+                if (file) {
+                    const newStoragePath = `usuarios/${currentUserId}/fotos_alunos/${alunoId}/${file.name}`;
+                    const storageRef = ref(storage, newStoragePath);
+                    const uploadSnapshot = await uploadBytes(storageRef, file);
+                    const newDownloadURL = await getDownloadURL(uploadSnapshot.ref);
+                    
+                    await updateDoc(doc(db, docPath), {
+                        fotoUrl: newDownloadURL,
+                        fotoStoragePath: newStoragePath
+                    });
+
+                    if (oldStoragePath && oldStoragePath !== newStoragePath) {
+                        const oldFotoRef = ref(storage, oldStoragePath);
+                        await deleteObject(oldFotoRef);
+                    }
+                }
+                
+                showMessage("Aluno atualizado com sucesso!", "success");
+                closeEditAlunoModal();
+                if (selectedAlunoId === alunoId) {
+                    const alunoAtualizado = listaAlunosCache.find(a => a.id === alunoId);
+                    if(alunoAtualizado) {
+                        alunoAtualizado.nome = editAlunoNome.value;
+                        alunoAtualizado.dataNascimento = editAlunoNascimento.value;
+                        alunoAtualizado.infoGeral = editAlunoInfoGeral.value;
+                        showAlunoDashboard(alunoId);
+                    }
+                }
+
+            } catch (error) {
+                console.error("Erro ao atualizar aluno: ", error);
+                showMessage("Erro ao atualizar o aluno.", "error");
+            } finally {
+                submitEditAlunoButton.disabled = false;
+                submitEditAlunoButton.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Alterações';
+            }
+        });
+
+
+        async function handleDeleteAluno(alunoId, alunoNome, fotoStoragePath) {
             console.warn("Confirmação de exclusão pulada.");
             if (!currentUserId || !selectedTurmaId) return;
+            
             try {
+                if (fotoStoragePath) {
+                    const fotoRef = ref(storage, fotoStoragePath);
+                    await deleteObject(fotoRef);
+                }
+                
                 const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos/${alunoId}`;
                 await deleteDoc(doc(db, docPath));
+                
                 showMessage(`Aluno "${alunoNome}" excluído.`, "success");
-            } catch (error) { showMessage("Erro ao excluir o aluno.", "error"); }
+            } catch (error) {
+                console.error("Erro ao excluir aluno: ", error);
+                if (error.code === 'storage/object-not-found') {
+                    const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos/${alunoId}`;
+                    await deleteDoc(doc(db, docPath));
+                    showMessage(`Aluno "${alunoNome}" excluído (foto não encontrada no storage).`, "success");
+                } else {
+                    showMessage("Erro ao excluir o aluno.", "error");
+                }
+            }
         }
 
 
-        // --- Lógica do Firestore (Observações) ---
+        // --- Lógica do Firestore (Observações - Dashboard) ---
 
-        function carregarObservacoes() {
+        function carregarDashboardObservacoes() {
             if (!currentUserId || !selectedTurmaId || !selectedAlunoId) return;
+
+            dashboardLoadingObservacoes.classList.remove('hidden');
+            dashboardObservacoesList.innerHTML = '';
 
             const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/alunos/${selectedAlunoId}/observacoesAula`;
             const q = query(collection(db, collectionPath));
             
-            if (unsubscribeObservacoes) unsubscribeObservacoes();
+            if (unsubscribeDashboardObservacoes) unsubscribeDashboardObservacoes();
 
-            unsubscribeObservacoes = onSnapshot(q, (snapshot) => {
-                loadingObservacoes.classList.add('hidden');
-                observacoesList.innerHTML = '';
+            unsubscribeDashboardObservacoes = onSnapshot(q, (snapshot) => {
+                dashboardLoadingObservacoes.classList.add('hidden');
+                dashboardObservacoesList.innerHTML = '';
                 
                 if (snapshot.empty) {
-                    observacoesList.innerHTML = '<p class="text-gray-500 text-center">Nenhuma observação registrada.</p>';
+                    dashboardObservacoesList.innerHTML = '<p class="text-gray-500 text-center">Nenhuma observação registrada.</p>';
                     return;
                 }
 
@@ -764,27 +1726,27 @@
                     obsCard.innerHTML = `
                         <div class="flex justify-between items-center mb-1">
                             <p class="text-sm font-bold text-gray-700">${dataFormatada}</p>
-                            <button data-id="${obs.id}" class="delete-observacao-button text-xs text-red-500 hover:text-red-700">
+                            <button data-id="${obs.id}" class="delete-dashboard-observacao-button text-xs text-red-500 hover:text-red-700">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                         <p class="text-gray-800 whitespace-pre-wrap">${obs.texto}</p>
                     `;
                     
-                    obsCard.querySelector('.delete-observacao-button').addEventListener('click', () => {
-                        handleDeleteObservacao(obs.id);
+                    obsCard.querySelector('.delete-dashboard-observacao-button').addEventListener('click', () => {
+                        handleDeleteDashboardObservacao(obs.id);
                     });
 
-                    observacoesList.appendChild(obsCard);
+                    dashboardObservacoesList.appendChild(obsCard);
                 });
 
             }, (error) => { showMessage("Erro ao carregar observações.", "error"); });
         }
 
-        novaObservacaoForm.addEventListener('submit', async (e) => {
+        dashboardNovaObservacaoForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUserId || !selectedTurmaId || !selectedAlunoId) return;
-            const texto = novaObservacaoTexto.value;
+            const texto = dashboardNovaObservacaoTexto.value;
             if (!texto) {
                 showMessage("Escreva uma observação.", "error");
                 return;
@@ -795,11 +1757,11 @@
                     texto: texto,
                     data: serverTimestamp()
                 });
-                novaObservacaoForm.reset();
+                dashboardNovaObservacaoForm.reset();
             } catch (error) { showMessage("Erro ao salvar observação.", "error"); }
         });
 
-        async function handleDeleteObservacao(obsId) {
+        async function handleDeleteDashboardObservacao(obsId) {
             console.warn("Confirmação de exclusão pulada.");
             if (!currentUserId || !selectedTurmaId || !selectedAlunoId) return;
             try {
@@ -807,6 +1769,136 @@
                 await deleteDoc(doc(db, docPath));
             } catch (error) { showMessage("Erro ao excluir observação.", "error"); }
         }
+
+        // --- Lógica do Firestore (Frequência) ---
+
+        carregarFrequenciaButton.addEventListener('click', carregarFrequenciaDoDia);
+        salvarFrequenciaButton.addEventListener('click', handleSalvarFrequencia);
+
+        async function carregarFrequenciaDoDia() {
+            if (!currentUserId || !selectedTurmaId) return;
+
+            const dataSelecionada = frequenciaDataInput.value;
+            if (!dataSelecionada) {
+                showMessage("Por favor, selecione uma data.", "error");
+                return;
+            }
+            
+            const docId = dataSelecionada; 
+            
+            loadingFrequencia.textContent = "Carregando...";
+            loadingFrequencia.classList.remove('hidden');
+            
+            frequenciaAlunosList.innerHTML = ''; 
+            salvarFrequenciaButton.classList.add('hidden');
+
+            let statusSalvos = {};
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/frequencia/${docId}`;
+                const docSnap = await getDoc(doc(db, docPath));
+                
+                if (docSnap.exists()) {
+                    statusSalvos = docSnap.data().statusAlunos || {};
+                }
+            } catch (error) {
+                showMessage("Erro ao buscar frequência salva.", "error");
+            }
+            
+            loadingFrequencia.classList.add('hidden'); 
+            
+            if (listaAlunosCache.length === 0) {
+                frequenciaAlunosList.innerHTML = '<p class="text-gray-500 text-center">Nenhum aluno cadastrado para lançar frequência.</p>';
+                return;
+            }
+
+            listaAlunosCache.forEach(aluno => {
+                const status = statusSalvos[aluno.id] || 'J'; 
+                
+                const presenteChecked = status === 'P' ? 'checked' : '';
+                const faltaChecked = status === 'F' ? 'checked' : '';
+                const justificadoChecked = status === 'J' ? 'checked' : '';
+
+                const alunoCard = document.createElement('div');
+                alunoCard.className = "flex justify-between items-center bg-gray-50 p-3 rounded-lg";
+                
+                alunoCard.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                            ${aluno.fotoUrl ? 
+                                `<img src="${aluno.fotoUrl}" alt="${aluno.nome}" class="w-full h-full object-cover">` : 
+                                placeholderIcon
+                            }
+                        </div>
+                        <p class="font-medium text-gray-800">${aluno.nome}</p>
+                    </div>
+                    
+                    <div class="flex rounded-lg shadow-sm" role="group">
+                        <div>
+                            <input type="radio" name="frequencia-${aluno.id}" id="p-${aluno.id}" value="P" class="peer hidden" ${presenteChecked}>
+                            <label for="p-${aluno.id}" class="px-4 py-2 rounded-l-lg cursor-pointer text-sm font-medium bg-white text-gray-900 border border-gray-200 hover:bg-gray-100 peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600">
+                                <i class="fas fa-check"></i>
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" name="frequencia-${aluno.id}" id="f-${aluno.id}" value="F" class="peer hidden" ${faltaChecked}>
+                            <label for="f-${aluno.id}" class="px-4 py-2 cursor-pointer text-sm font-medium bg-white text-gray-900 border-t border-b border-gray-200 hover:bg-gray-100 peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600">
+                                <i class="fas fa-times"></i>
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" name="frequencia-${aluno.id}" id="j-${aluno.id}" value="J" class="peer hidden" ${justificadoChecked}>
+                            <label for="j-${aluno.id}" class="px-4 py-2 rounded-r-lg cursor-pointer text-sm font-medium bg-white text-gray-900 border border-gray-200 hover:bg-gray-100 peer-checked:bg-yellow-500 peer-checked:text-white peer-checked:border-yellow-500">
+                                <i class="fas fa-info-circle"></i>
+                            </label>
+                        </div>
+                    </div>
+                `;
+                frequenciaAlunosList.appendChild(alunoCard);
+            });
+            
+            salvarFrequenciaButton.classList.remove('hidden');
+        }
+
+        async function handleSalvarFrequencia() {
+            if (!currentUserId || !selectedTurmaId) return;
+            
+            const dataSelecionada = frequenciaDataInput.value;
+            if (!dataSelecionada) {
+                showMessage("Data inválida.", "error");
+                return;
+            }
+            
+            const docId = dataSelecionada;
+            const statusAlunos = {};
+            
+            listaAlunosCache.forEach(aluno => {
+                const radioChecked = document.querySelector(`input[name="frequencia-${aluno.id}"]:checked`);
+                if (radioChecked) {
+                    statusAlunos[aluno.id] = radioChecked.value;
+                } else {
+                    statusAlunos[aluno.id] = 'P'; 
+                }
+            });
+            
+            salvarFrequenciaButton.disabled = true;
+            salvarFrequenciaButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/frequencia/${docId}`;
+                await setDoc(doc(db, docPath), {
+                    data: dataSelecionada,
+                    statusAlunos: statusAlunos
+                });
+                showMessage("Frequência salva com sucesso!", "success");
+            } catch (error) {
+                console.error("Erro ao salvar frequência: ", error);
+                showMessage("Erro ao salvar a frequência.", "error");
+            } finally {
+                salvarFrequenciaButton.disabled = false;
+                salvarFrequenciaButton.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Frequência';
+            }
+        }
+
 
         // --- Lógica do Firestore (Plano de Aula) ---
 
@@ -830,23 +1922,18 @@
                     return;
                 }
 
-                // 1. Converter para array
                 const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                // 2. Ordenar por data da aula (mais recentes primeiro)
                 const docsOrdenados = docs.sort((a, b) => {
-                    // Se a dataAula não existir, use data de criação
                     const dataA = new Date(a.dataAula || a.criadoEm?.toDate() || 0);
                     const dataB = new Date(b.dataAula || b.criadoEm?.toDate() || 0);
                     return dataB - dataA;
                 });
 
-                // 3. Renderizar
                 docsOrdenados.forEach((plano) => {
                     const planoCard = document.createElement('div');
                     planoCard.className = "bg-gray-50 p-4 rounded-lg shadow-sm";
                     
-                    // Formata a data (YYYY-MM-DD) para DD/MM/YYYY
                     let dataFormatada = 'Sem data';
                     if (plano.dataAula) {
                         const [ano, mes, dia] = plano.dataAula.split('-');
@@ -859,9 +1946,14 @@
                                 <h4 class="text-lg font-bold text-indigo-700">${plano.topicoAula || 'Sem Tópico'}</h4>
                                 <p class="text-sm font-medium text-gray-600">${dataFormatada}</p>
                             </div>
-                            <button data-id="${plano.id}" class="delete-plano-button text-red-500 hover:text-red-700">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <div class="flex gap-2">
+                                <button class="edit-plano-button text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button class="delete-plano-button text-red-500 hover:text-red-700">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                         <div class="space-y-2 mt-3">
                             ${plano.detalhes ? `
@@ -877,6 +1969,10 @@
                         </div>
                     `;
 
+                    planoCard.querySelector('.edit-plano-button').addEventListener('click', () => {
+                        openEditPlanoAulaModal(plano);
+                    });
+                    
                     planoCard.querySelector('.delete-plano-button').addEventListener('click', () => {
                         handleDeletePlanoDeAula(plano.id, plano.topicoAula);
                     });
@@ -884,23 +1980,39 @@
                     planoAulaList.appendChild(planoCard);
                 });
 
-            }, (error) => { 
-                console.error("Erro ao carregar planos de aula: ", error);
-                showMessage("Erro ao carregar planos de aula.", "error"); 
-            });
+            }, (error) => { showMessage("Erro ao carregar planos de aula.", "error"); });
         }
+        
+        editPlanoAulaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId || !selectedTurmaId) return;
+            
+            const planoId = editPlanoAulaId.value;
+            const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/planosDeAula/${planoId}`;
 
-        /** Salva um novo Plano de Aula */
+            const dadosAtualizados = {
+                topicoAula: editPlanoAulaTopico.value,
+                dataAula: editPlanoAulaData.value,
+                detalhes: editPlanoAulaDetalhes.value,
+                atividades: editPlanoAulaAtividades.value
+            };
+            
+            try {
+                await updateDoc(doc(db, docPath), dadosAtualizados);
+                showMessage("Plano de aula atualizado!", "success");
+                closeEditPlanoAulaModal();
+            } catch (error) {
+                console.error("Erro ao atualizar plano de aula: ", error);
+                showMessage("Erro ao atualizar o plano de aula.", "error");
+            }
+        });
+
         novoPlanoAulaForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUserId || !selectedTurmaId) return;
 
-            // Pega os valores
             const topico = planoAulaTopico.value;
             const data = planoAulaData.value;
-            const detalhes = planoAulaDetalhes.value;
-            const atividades = planoAulaAtividades.value;
-
             if (!topico || !data) {
                 showMessage("Tópico da aula e Data são obrigatórios.", "error");
                 return;
@@ -910,22 +2022,18 @@
                 const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/planosDeAula`;
                 await addDoc(collection(db, collectionPath), {
                     topicoAula: topico,
-                    dataAula: data, // Salva como string (YYYY-MM-DD)
-                    detalhes: detalhes || "",
-                    atividades: atividades || "",
-                    criadoEm: serverTimestamp() // Para saber quando foi criado
+                    dataAula: data, 
+                    detalhes: planoAulaDetalhes.value || "",
+                    atividades: planoAulaAtividades.value || "",
+                    criadoEm: serverTimestamp()
                 });
 
                 showMessage("Plano de aula salvo!", "success");
                 novoPlanoAulaForm.reset();
 
-            } catch (error) {
-                console.error("Erro ao salvar plano de aula: ", error);
-                showMessage("Erro ao salvar plano de aula.", "error");
-            }
+            } catch (error) { showMessage("Erro ao salvar plano de aula.", "error"); }
         });
 
-        /** Deleta um Plano de Aula */
         async function handleDeletePlanoDeAula(planoId, planoTopico) {
             console.warn("Confirmação de exclusão pulada.");
             if (!currentUserId || !selectedTurmaId) return;
@@ -934,11 +2042,330 @@
                 const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/planosDeAula/${planoId}`;
                 await deleteDoc(doc(db, docPath));
                 showMessage(`Plano "${planoTopico}" excluído.`, "success");
-            } catch (error) {
-                console.error("Erro ao excluir plano de aula: ", error);
-                showMessage("Erro ao excluir plano de aula.", "error");
+            } catch (error) { showMessage("Erro ao excluir plano de aula.", "error"); }
+        }
+
+
+        // --- Lógica do Firestore (Atividades & Notas) ---
+
+        function carregarAtividades() {
+            if (!currentUserId || !selectedTurmaId) return;
+
+            loadingAtividades.classList.remove('hidden');
+            atividadesList.innerHTML = '';
+
+            const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/atividades`;
+            const q = query(collection(db, collectionPath));
+            
+            if (unsubscribeAtividades) unsubscribeAtividades();
+
+            unsubscribeAtividades = onSnapshot(q, (snapshot) => {
+                loadingAtividades.classList.add('hidden');
+                atividadesList.innerHTML = '';
+                
+                listaAtividadesCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                if (listaAtividadesCache.length === 0) {
+                    atividadesList.innerHTML = '<p class="text-gray-500 text-center">Nenhuma atividade criada.</p>';
+                    return;
+                }
+
+                listaAtividadesCache.forEach((atividade) => {
+                    const atividadeId = atividade.id;
+                    const atividadeCard = document.createElement('div');
+                    atividadeCard.className = "flex justify-between items-center bg-gray-50 p-4 rounded-lg shadow-sm";
+                    atividadeCard.innerHTML = `
+                        <div>
+                            <p class="font-bold text-gray-800">${atividade.nome}</p>
+                            <p class="text-sm text-gray-600">Valor: ${atividade.valorMaximo || 'N/A'}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="lancar-notas-button px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm">
+                                <i class="fas fa-edit mr-1"></i> Lançar Notas
+                            </button>
+                            <button class="edit-atividade-button px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-800">
+                                <i class="fas fa-pen"></i>
+                            </button>
+                            <button class="delete-atividade-button px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+
+                    atividadeCard.querySelector('.lancar-notas-button').addEventListener('click', () => {
+                        showLancamentoNotas(atividadeId, atividade.nome, atividade.valorMaximo);
+                    });
+                    
+                    atividadeCard.querySelector('.edit-atividade-button').addEventListener('click', () => {
+                        openEditAtividadeModal(atividade);
+                    });
+
+                    atividadeCard.querySelector('.delete-atividade-button').addEventListener('click', () => {
+                        handleDeleteAtividade(atividadeId, atividade.nome);
+                    });
+
+                    atividadesList.appendChild(atividadeCard);
+                });
+            }, (error) => { showMessage("Erro ao carregar atividades.", "error"); });
+        }
+        
+        editAtividadeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId || !selectedTurmaId) return;
+
+            const atividadeId = editAtividadeId.value;
+            const nome = editAtividadeNome.value;
+            const valor = editAtividadeValor.value;
+            
+            if (!nome || !valor) {
+                showMessage("Nome e Valor Máximo são obrigatórios.", "error");
+                return;
+            }
+
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/atividades/${atividadeId}`;
+                await updateDoc(doc(db, docPath), {
+                    nome: nome,
+                    valorMaximo: Number(valor)
+                });
+                showMessage("Atividade atualizada!", "success");
+                closeEditAtividadeModal();
+            } catch (error) { showMessage("Erro ao atualizar atividade.", "error"); }
+        });
+
+
+        // --- Lógica do Dashboard (Aba Notas) ---
+        
+        async function carregarDashboardNotas() {
+            if (!currentUserId || !selectedTurmaId || !selectedAlunoId) return;
+            
+            dashboardLoadingNotas.classList.remove('hidden');
+            dashboardNotasList.innerHTML = '';
+
+            if (listaAtividadesCache.length === 0) {
+                dashboardLoadingNotas.classList.add('hidden');
+                dashboardNotasList.innerHTML = '<p class="text-gray-500 text-center">Nenhuma atividade cadastrada para esta turma.</p>';
+                return;
+            }
+
+            const atividadesOrdenadas = [...listaAtividadesCache].sort((a, b) => a.nome.localeCompare(b.nome));
+
+            atividadesOrdenadas.forEach(atividade => {
+                const nota = atividade.notas[selectedAlunoId] || '--';
+                const valorMaximo = atividade.valorMaximo || '10';
+
+                const notaCard = document.createElement('div');
+                notaCard.className = "flex justify-between items-center bg-gray-100 p-3 rounded-lg";
+                notaCard.innerHTML = `
+                    <p class="font-medium text-gray-800">${atividade.nome}</p>
+                    <p class="font-bold text-lg ${nota === '--' ? 'text-gray-500' : 'text-indigo-700'}">
+                        ${nota}
+                        <span class="text-sm font-medium text-gray-600">/ ${valorMaximo}</span>
+                    </p>
+                `;
+                dashboardNotasList.appendChild(notaCard);
+            });
+            
+            dashboardLoadingNotas.classList.add('hidden');
+        }
+
+        // --- Lógica de Exportação CSV ---
+        exportarCSVButton.addEventListener('click', handleExportarCSV);
+        
+        function handleExportarCSV() {
+            if (listaAlunosCache.length === 0 || listaAtividadesCache.length === 0) {
+                showMessage("Não há dados suficientes (alunos e atividades) para exportar.", "error");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            const alunosOrdenados = [...listaAlunosCache].sort((a, b) => a.nome.localeCompare(b.nome));
+            const atividadesOrdenadas = [...listaAtividadesCache].sort((a, b) => a.nome.localeCompare(b.nome));
+
+            let header = ["Nome do Aluno"];
+            atividadesOrdenadas.forEach(atv => {
+                const nomeAtividade = (atv.nome || "").replace(/,/g, ""); 
+                header.push(`${nomeAtividade} (Valor: ${atv.valorMaximo})`);
+            });
+            csvContent += header.join(",") + "\r\n";
+
+            alunosOrdenados.forEach(aluno => {
+                let row = [(aluno.nome || "").replace(/,/g, "")];
+                atividadesOrdenadas.forEach(atv => {
+                    const nota = atv.notas[aluno.id] || ''; 
+                    row.push(nota);
+                });
+                csvContent += row.join(",") + "\r\n";
+            });
+
+            try {
+                var encodedUri = encodeURI(csvContent);
+                var link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                
+                const nomeTurmaLimpo = turmaDetalheNome.textContent.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                link.setAttribute("download", `notas_${nomeTurmaLimpo}.csv`);
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage("Exportando CSV...", "success");
+            } catch (e) {
+                console.error("Erro ao exportar CSV: ", e);
+                showMessage("Erro ao gerar o arquivo CSV.", "error");
             }
         }
+
+
+        // --- Restante da Lógica de Notas (Lançamento) ---
+
+        novaAtividadeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId || !selectedTurmaId) return;
+            
+            const nome = novaAtividadeNome.value;
+            const valor = novaAtividadeValor.value;
+            
+            if (!nome || !valor) {
+                showMessage("Nome e Valor Máximo são obrigatórios.", "error");
+                return;
+            }
+
+            try {
+                const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/atividades`;
+                await addDoc(collection(db, collectionPath), {
+                    nome: nome,
+                    valorMaximo: Number(valor),
+                    notas: {}, 
+                    criadoEm: serverTimestamp()
+                });
+                showMessage("Atividade criada!", "success");
+                novaAtividadeForm.reset();
+            } catch (error) { showMessage("Erro ao salvar atividade.", "error"); }
+        });
+
+        async function handleDeleteAtividade(atividadeId, atividadeNome) {
+            console.warn("Confirmação de exclusão pulada.");
+            if (!currentUserId || !selectedTurmaId) return;
+            
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/atividades/${atividadeId}`;
+                await deleteDoc(doc(db, docPath));
+                showMessage(`Atividade "${atividadeNome}" excluída.`, "success");
+            } catch (error) { showMessage("Erro ao excluir atividade.", "error"); }
+        }
+
+        function showAtividadesList() {
+            notasLancamentoContainer.classList.add('hidden');
+            notasListaAtividades.classList.remove('hidden');
+            selectedAtividadeId = null;
+        }
+        
+        function showLancamentoNotas(atividadeId, atividadeNome, valorMaximo) {
+            selectedAtividadeId = atividadeId;
+            notasListaAtividades.classList.add('hidden');
+            notasLancamentoContainer.classList.remove('hidden');
+            
+            lancamentoAtividadeNome.textContent = `Lançar Notas: ${atividadeNome} (Valor: ${valorMaximo})`;
+            loadingLancamentoAlunos.classList.remove('hidden');
+            lancamentoAlunosList.innerHTML = '';
+            
+            renderLancamentoAlunos();
+        }
+        voltarAtividadesButton.addEventListener('click', showAtividadesList);
+        
+        async function renderLancamentoAlunos() {
+            if (!currentUserId || !selectedTurmaId || !selectedAtividadeId) return;
+
+            let notasSalvas = {};
+            let valorMaximo = 10;
+            let atividadeNome = "";
+
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/atividades/${selectedAtividadeId}`;
+                const atividadeDoc = await getDoc(doc(db, docPath));
+                
+                if (atividadeDoc.exists()) {
+                    const data = atividadeDoc.data();
+                    notasSalvas = data.notas || {};
+                    valorMaximo = data.valorMaximo || 10;
+                    atividadeNome = data.nome || "";
+                }
+            } catch (error) {
+                showMessage("Erro ao buscar notas salvas.", "error");
+            }
+            
+            lancamentoAtividadeNome.textContent = `Lançar Notas: ${atividadeNome} (Valor: ${valorMaximo})`;
+            
+            loadingLancamentoAlunos.classList.add('hidden');
+            lancamentoAlunosList.innerHTML = '';
+            
+            if (listaAlunosCache.length === 0) {
+                lancamentoAlunosList.innerHTML = '<p class="text-gray-500 text-center">Nenhum aluno encontrado nesta turma.</p>';
+                return;
+            }
+            
+            listaAlunosCache.forEach(aluno => {
+                const notaAtual = notasSalvas[aluno.id] || ''; 
+                
+                const alunoNotaCard = document.createElement('div');
+                alunoNotaCard.className = "flex justify-between items-center bg-gray-50 p-3 rounded-lg";
+                
+                const imgContainer = document.createElement('div');
+                imgContainer.className = "w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 mr-3";
+                if (aluno.fotoUrl) {
+                    imgContainer.innerHTML = `<img src="${aluno.fotoUrl}" alt="${aluno.nome}" class="w-full h-full object-cover">`;
+                } else {
+                    imgContainer.innerHTML = placeholderIcon;
+                }
+                
+                const nomeP = document.createElement('p');
+                nomeP.className = "font-medium text-gray-800 flex-grow";
+                nomeP.textContent = aluno.nome;
+                
+                const input = document.createElement('input');
+                input.type = "text"; 
+                input.dataset.alunoId = aluno.id;
+                input.value = notaAtual;
+                input.placeholder = `0 - ${valorMaximo}`;
+                input.className = "w-32 px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-right focus:outline-none focus:ring-indigo-500 focus:border-indigo-500";
+                
+                alunoNotaCard.appendChild(imgContainer);
+                alunoNotaCard.appendChild(nomeP);
+                alunoNotaCard.appendChild(input);
+                lancamentoAlunosList.appendChild(alunoNotaCard);
+            });
+        }
+        
+        salvarNotasButton.addEventListener('click', async () => {
+            if (!currentUserId || !selectedTurmaId || !selectedAtividadeId) return;
+
+            const inputs = lancamentoAlunosList.querySelectorAll('input[data-aluno-id]');
+            const novasNotas = {};
+
+            inputs.forEach(input => {
+                const alunoId = input.dataset.alunoId;
+                const nota = input.value;
+                if (nota) { 
+                    novasNotas[alunoId] = nota;
+                }
+            });
+            
+            try {
+                const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/atividades/${selectedAtividadeId}`;
+                await updateDoc(doc(db, docPath), {
+                    notas: novasNotas
+                });
+                
+                showMessage("Notas salvas com sucesso!", "success");
+                showAtividadesList(); 
+                
+            } catch (error) {
+                console.error("Erro ao salvar notas: ", error);
+                showMessage("Erro ao salvar as notas.", "error");
+            }
+        });
 
 
     </script>
