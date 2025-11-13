@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel do Professor</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts (Inter) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome (para ícones) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         /* Estilo base com a fonte Inter */
         body {
@@ -56,15 +56,12 @@
 </head>
 <body class="bg-gray-100 text-gray-900">
 
-    <!-- Container Global -->
     <div class="min-h-screen flex flex-col items-center justify-center">
 
-        <!-- ===== TELA DE LOGIN ===== -->
         <div id="auth-container" class="w-full max-w-md p-8">
             <div class="bg-white p-8 rounded-2xl shadow-xl">
                 <h2 class="text-3xl font-bold text-center text-indigo-600 mb-8">Painel do Professor</h2>
                 
-                <!-- Formulário de Autenticação -->
                 <form id="auth-form" class="space-y-6">
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
@@ -92,10 +89,8 @@
             </div>
         </div>
 
-        <!-- ===== TELA PRINCIPAL DO APP (Invisível por padrão) ===== -->
         <div id="app-container" class="hidden w-full min-h-screen">
             
-            <!-- Navbar (MODIFICADA) -->
             <nav class="bg-white shadow-md">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-16">
@@ -104,11 +99,9 @@
                             <span class="font-bold text-xl text-indigo-600">Painel do Professor</span>
                         </div>
                         <div class="flex items-center">
-                            <!-- Botão de Perfil (NOVO) -->
                             <button id="open-perfil-modal-button" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
                                 <div id="navbar-foto-preview" class="w-10 h-10 rounded-full overflow-hidden bg-gray-200 border-2 border-indigo-100">
-                                    <!-- Foto do perfil ou placeholder -->
-                                </div>
+                                    </div>
                                 <span id="user-greeting" class="text-sm text-gray-700 mr-4 font-medium">Carregando...</span>
                             </button>
                             
@@ -120,29 +113,41 @@
                 </div>
             </nav>
 
-            <!-- Conteúdo Principal -->
             <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 w-full">
-                
-                <!-- 1. CONTAINER DA LISTA DE TURMAS (Visível por padrão) -->
-                <div id="turmas-list-container">
-                    <!-- Header da Seção de Turmas -->
+
+                <div id="escolas-list-container" class="hidden"> 
                     <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-3xl font-bold text-gray-800">Minhas Turmas</h1>
+                        <h1 class="text-3xl font-bold text-gray-800">Minhas Escolas</h1>
+                        <button id="show-escola-modal-button" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow">
+                            <i class="fas fa-school mr-2"></i> Nova Escola
+                        </button>
+                    </div>
+
+                    <div id="escolas-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <p id="loading-escolas" class="text-gray-500">Carregando escolas...</p>
+                    </div>
+                </div>
+
+                
+                <div id="turmas-list-container" class="hidden"> 
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center gap-4">
+                            <button id="voltar-escolas-button" class="p-2 rounded-full hover:bg-gray-200 transition-colors">
+                                <i class="fas fa-arrow-left text-indigo-600 text-xl"></i>
+                            </button>
+                            <h1 id="turmas-list-header-title" class="text-3xl font-bold text-gray-800">Minhas Turmas</h1>
+                        </div>
                         <button id="show-turma-modal-button" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors shadow">
                             <i class="fas fa-plus mr-2"></i> Nova Turma
                         </button>
                     </div>
 
-                    <!-- Lista de Turmas -->
                     <div id="turmas-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Cards das turmas serão inseridos aqui pelo JS -->
                         <p id="loading-turmas" class="text-gray-500">Carregando turmas...</p>
                     </div>
                 </div>
 
-                <!-- 2. CONTAINER DE DETALHE DA TURMA (Invisível por padrão) -->
                 <div id="turma-detalhe-container" class="hidden">
-                    <!-- Header (Voltar e Nome da Turma) -->
                     <div class="flex items-center mb-6">
                         <button id="voltar-turmas-button" class="mr-4 p-2 rounded-full hover:bg-gray-200 transition-colors">
                             <i class="fas fa-arrow-left text-indigo-600 text-xl"></i>
@@ -150,7 +155,6 @@
                         <h1 id="turma-detalhe-nome" class="text-3xl font-bold text-gray-800">Nome da Turma</h1>
                     </div>
 
-                    <!-- Mural de Avisos -->
                     <div id="mural-avisos-container" class="mb-6 bg-yellow-50 border border-yellow-200 p-4 rounded-2xl shadow-sm">
                         <label for="mural-avisos-textarea" class="block text-sm font-bold text-yellow-800 mb-2">
                             <i class="fas fa-thumbtack mr-1"></i> Mural de Avisos / Lembretes Rápidos
@@ -162,9 +166,8 @@
                     </div>
 
 
-                    <!-- Abas de Navegação -->
                     <div class="mb-6 border-b border-gray-200">
-                        <nav class="flex flex-wrap space-x-4 sm:space-x-6 -mb-px">
+                        <nav class="flex flex-wrap space-x-2 sm:space-x-4 -mb-px">
                             <button id="tab-alunos" class="tab-button active py-4 px-1 border-b-4 text-sm sm:text-base font-medium">
                                 <i class="fas fa-users mr-2"></i>Alunos
                             </button>
@@ -177,18 +180,17 @@
                             <button id="tab-notas" class="tab-button py-4 px-1 border-b-4 text-sm sm:text-base font-medium">
                                 <i class="fas fa-graduation-cap mr-2"></i>Atividades & Notas
                             </button>
+                            <button id="tab-relatorios" class="tab-button py-4 px-1 border-b-4 text-sm sm:text-base font-medium">
+                                <i class="fas fa-chart-pie mr-2"></i>Relatórios
+                            </button>
                         </nav>
                     </div>
 
-                    <!-- Conteúdo das Abas -->
                     <div>
-                        <!-- 2.1 Conteúdo da Aba Alunos -->
                         <div id="alunos-content" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">Alunos da Turma</h2>
 
-                            <!-- Formulário de Novo Aluno (COM UPLOAD) -->
                             <form id="novo-aluno-form" class="mb-6 pb-6 border-b border-gray-200 space-y-4">
-                                <!-- Linha 1: Nome e Data de Nascimento -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label for="aluno-nome" class="block text-sm font-medium text-gray-700">Nome do Aluno</label>
@@ -199,7 +201,6 @@
                                         <input type="date" id="aluno-nascimento" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                                     </div>
                                 </div>
-                                <!-- Linha 2: Upload da Foto -->
                                 <div>
                                     <label for="aluno-foto-input" class="block text-sm font-medium text-gray-700">Foto do Aluno</label>
                                     <input type="file" id="aluno-foto-input" accept="image/*" class="mt-1 block w-full text-sm text-gray-500
@@ -209,7 +210,6 @@
                                         file:bg-indigo-50 file:text-indigo-700
                                         hover:file:bg-indigo-100">
                                 </div>
-                                <!-- Linha 3: Informações Gerais -->
                                 <div>
                                     <label for="aluno-info-geral" class="block text-sm font-medium text-gray-700">Informações Gerais</label>
                                     <textarea id="aluno-info-geral" rows="3" placeholder="Ex: Alergias, contato dos pais, observações permanentes..." class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
@@ -220,17 +220,14 @@
                                 </button>
                             </form>
 
-                            <!-- Lista de Alunos -->
                             <div id="alunos-list" class="space-y-4">
                                 <p id="loading-alunos" class="text-gray-500">Carregando alunos...</p>
                             </div>
                         </div>
 
-                        <!-- 2.2 Conteúdo da Aba Frequência -->
                         <div id="frequencia-content" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">Controle de Frequência</h2>
                             
-                            <!-- Seletor de Data -->
                             <div class="flex flex-col sm:flex-row gap-4 mb-6 pb-6 border-b border-gray-200">
                                 <div class="flex-grow">
                                     <label for="frequencia-data-input" class="block text-sm font-medium text-gray-700">Selecione o Dia</label>
@@ -241,25 +238,19 @@
                                 </button>
                             </div>
                             
-                            <!-- Indicador de Loading -->
                             <p id="loading-frequencia" class="text-gray-500 text-center mb-4 hidden">Carregando...</p>
                             
-                            <!-- Lista de Alunos para Frequência -->
                             <div id="frequencia-alunos-list" class="space-y-3 mb-6">
-                                <!-- O texto inicial foi movido para o JS -->
-                            </div>
+                                </div>
                             
-                            <!-- Botão Salvar -->
                             <button id="salvar-frequencia-button" class="hidden w-full px-5 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow">
                                 <i class="fas fa-save mr-2"></i> Salvar Frequência
                             </button>
                         </div>
                         
-                        <!-- 2.3 Conteúdo da Aba Plano de Aula -->
                         <div id="plano-aula-content" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
                             <h2 class="text-2xl font-bold text-gray-800 mb-6">Plano de Aula</h2>
 
-                            <!-- Formulário de Novo Plano de Aula -->
                             <form id="novo-plano-aula-form" class="mb-6 pb-6 border-b border-gray-200 space-y-4">
                                 <div class="flex flex-col sm:flex-row gap-4">
                                     <div class="flex-grow">
@@ -284,20 +275,15 @@
                                 </button>
                             </form>
 
-                            <!-- Lista de Planos de Aula -->
                             <h3 class="text-xl font-bold text-gray-700 mb-4">Histórico de Aulas</h3>
                             <p id="loading-planos-aula" class="text-gray-500">Carregando planos de aula...</p>
                             <div id="plano-aula-list" class="space-y-4">
-                                <!-- Planos de aula serão inseridos aqui -->
-                            </div>
+                                </div>
                         </div>
                         
-                        <!-- 2.4 Conteúdo da Aba Atividades & Notas -->
                         <div id="notas-content" class="hidden bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
                             
-                            <!-- Sub-tela: Lista de Atividades (Padrão) -->
                             <div id="notas-lista-atividades">
-                                <!-- Header com botão de exportar -->
                                 <div class="flex justify-between items-center mb-6">
                                     <h2 class="text-2xl font-bold text-gray-800">Atividades & Notas</h2>
                                     <button id="exportar-csv-button" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors shadow text-sm">
@@ -305,7 +291,6 @@
                                     </button>
                                 </div>
                                 
-                                <!-- Formulário de Nova Atividade -->
                                 <form id="nova-atividade-form" class="mb-6 pb-6 border-b border-gray-200 space-y-4">
                                     <div class="flex flex-col sm:flex-row gap-4">
                                         <div class="flex-grow">
@@ -322,17 +307,13 @@
                                     </button>
                                 </form>
                                 
-                                <!-- Lista de Atividades Criadas -->
                                 <h3 class="text-xl font-bold text-gray-700 mb-4">Atividades Criadas</h3>
                                 <p id="loading-atividades" class="text-gray-500">Carregando atividades...</p>
                                 <div id="atividades-list" class="space-y-4">
-                                    <!-- Atividades serão inseridas aqui -->
-                                </div>
+                                    </div>
                             </div>
 
-                            <!-- Sub-tela: Lançamento de Notas (Invisível por padrão) -->
                             <div id="notas-lancamento-container" class="hidden">
-                                <!-- Header (Voltar e Nome da Atividade) -->
                                 <div class="flex items-center mb-6">
                                     <button id="voltar-atividades-button" class="mr-4 p-2 rounded-full hover:bg-gray-200 transition-colors">
                                         <i class="fas fa-arrow-left text-indigo-600 text-xl"></i>
@@ -340,9 +321,7 @@
                                     <h2 id="lancamento-atividade-nome" class="text-2xl font-bold text-gray-800">Lançar Notas: ...</h2>
                                 </div>
                                 
-                                <!-- Lista de Alunos para Lançamento -->
                                 <div id="lancamento-alunos-list" class="space-y-3 mb-6">
-                                    <!-- Alunos com inputs de nota serão inseridos aqui -->
                                     <p id="loading-lancamento-alunos" class="text-gray-500">Carregando alunos...</p>
                                 </div>
                                 
@@ -352,26 +331,82 @@
                             </div>
                             
                         </div>
-                    </div>
-                </div>
+                        
+                        <div id="relatorios-content" class="hidden">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            
+                                <div class="bg-white p-6 rounded-2xl shadow-xl">
+                                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Relatório de Frequência (Últimos 30 dias)</h2>
+                                    <p id="loading-relatorio-frequencia" class="text-gray-500 text-center">Calculando...</p>
+                                    <div id="frequencia-chart-container" class="relative hidden" style="height: 300px;">
+                                        <canvas id="frequencia-chart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-6 rounded-2xl shadow-xl">
+                                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Ranking de Faltas (Últimos 30 dias)</h2>
+                                    <p id="loading-ranking-faltas" class="text-gray-500 text-center">Calculando...</p>
+                                    <div id="ranking-faltas-list" class="space-y-3 max-h-80 overflow-y-auto">
+                                        </div>
+                                </div>
+                                
+                                <div class="bg-white p-6 rounded-2xl shadow-xl lg:col-span-2">
+                                    <h2 class="text-2xl font-bold text-gray-800 mb-6">Desempenho da Turma (Média por Atividade)</h2>
+                                    <p id="loading-relatorio-notas" class="text-gray-500 text-center">Calculando...</p>
+                                    <div id="notas-chart-container" class="relative hidden" style="height: 350px;">
+                                        <canvas id="notas-chart"></canvas>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+
+                    </div> </div>
 
             </main>
         </div>
 
     </div>
 
-    <!-- ===== MODAL (POP-UP) PARA NOVA TURMA (REUTILIZADO PARA EDITAR) ===== -->
+    <div id="nova-escola-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
+            <div class="flex justify-between items-center mb-6">
+                <h3 id="escola-modal-title" class="text-2xl font-bold text-gray-800">Cadastrar Nova Escola</h3>
+                <button id="close-escola-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
+                    &times;
+                </button>
+            </div>
+            <form id="nova-escola-form" class="space-y-4">
+                <input type="hidden" id="escola-edit-id">
+                <div>
+                    <label for="escola-nome" class="block text-sm font-medium text-gray-700">Nome da Escola</label>
+                    <input type="text" id="escola-nome" name="escola-nome" required placeholder="Ex: E.M.E.F. ABC"
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="escola-endereco" class="block text-sm font-medium text-gray-700">Endereço (Opcional)</label>
+                    <input type="text" id="escola-endereco" name="escola-endereco" placeholder="Ex: Rua dos Bobos, nº 0"
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="pt-4">
+                    <button type="submit" id="escola-submit-button"
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        Salvar Escola
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="nova-turma-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
             <div class="flex justify-between items-center mb-6">
-                <!-- Título dinâmico -->
                 <h3 id="turma-modal-title" class="text-2xl font-bold text-gray-800">Criar Nova Turma</h3>
                 <button id="close-turma-modal-button" class="text-gray-400 hover:text-gray-600 text-2xl">
                     &times;
                 </button>
             </div>
             <form id="nova-turma-form" class="space-y-4">
-                <!-- Input oculto para guardar o ID em modo de edição -->
                 <input type="hidden" id="turma-edit-id">
                 <div>
                     <label for="turma-nome" class="block text-sm font-medium text-gray-700">Nome da Turma</label>
@@ -384,7 +419,6 @@
                            class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 <div class="pt-4">
-                    <!-- Botão dinâmico -->
                     <button type="submit" id="turma-submit-button"
                             class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                         Salvar
@@ -394,7 +428,6 @@
         </div>
     </div>
 
-    <!-- ===== MODAL (POP-UP) PARA EDITAR ATIVIDADE ===== -->
     <div id="edit-atividade-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
             <div class="flex justify-between items-center mb-6">
@@ -423,7 +456,6 @@
         </div>
     </div>
 
-    <!-- ===== MODAL (POP-UP) PARA EDITAR PLANO DE AULA ===== -->
     <div id="edit-plano-aula-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
             <div class="flex justify-between items-center mb-6">
@@ -462,24 +494,18 @@
         </div>
     </div>
 
-    <!-- ===== MODAL (POP-UP) PARA DASHBOARD DO ALUNO ===== -->
     <div id="aluno-dashboard-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
         <div class="relative top-10 mx-auto p-0 border w-full max-w-3xl shadow-lg rounded-2xl bg-white">
             
-            <!-- Header do Dashboard -->
             <div class="flex items-start p-5 border-b border-gray-200">
-                <!-- Foto -->
                 <div id="dashboard-aluno-foto" class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 border-4 border-white shadow-md">
-                    <!-- Imagem ou Placeholder inserido pelo JS -->
-                </div>
-                <!-- Infos -->
+                    </div>
                 <div class="ml-5 flex-grow">
                     <h3 id="dashboard-aluno-nome" class="text-2xl font-bold text-gray-800">Carregando...</h3>
                     <p id="dashboard-aluno-nascimento" class="text-sm text-gray-600 mt-1"></p>
                     <p class="text-sm text-gray-500 mt-2 font-medium">INFORMAÇÕES GERAIS:</p>
                     <p id="dashboard-aluno-info-geral" class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded-md max-h-24 overflow-y-auto"></p>
                 </div>
-                <!-- Botões de Ação (Fechar e Editar) -->
                 <div class="flex flex-col items-end">
                     <button id="close-dashboard-modal-button" class="text-gray-400 hover:text-gray-600 text-3xl font-light -mt-2">
                         &times;
@@ -490,7 +516,6 @@
                 </div>
             </div>
 
-            <!-- Abas do Dashboard (Observações / Desempenho) -->
             <div class="border-b border-gray-200 bg-gray-50">
                 <nav class="flex space-x-4 px-5 -mb-px">
                     <button id="dashboard-tab-observacoes" class="dashboard-tab-button active py-4 px-3 border-b-4 text-sm font-medium">
@@ -502,11 +527,8 @@
                 </nav>
             </div>
 
-            <!-- Conteúdo das Abas do Dashboard -->
             <div class="p-5" style="max-height: 60vh; overflow-y: auto;">
-                <!-- Aba 1: Observações -->
                 <div id="dashboard-content-observacoes">
-                    <!-- Formulário para Nova Observação -->
                     <form id="dashboard-nova-observacao-form" class="mb-6">
                         <label for="dashboard-nova-observacao-texto" class="block text-sm font-medium text-gray-700 mb-2">Nova Observação (aula de hoje, etc.):</label>
                         <textarea id="dashboard-nova-observacao-texto" rows="3" required class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" placeholder="Ex: Participou ativamente na discussão sobre..."></textarea>
@@ -516,29 +538,24 @@
                         </button>
                     </form>
 
-                    <!-- Lista de Observações Anteriores -->
                     <div>
                         <h4 class="text-lg font-bold text-gray-700 mb-4">Histórico de Observações</h4>
                         <p id="dashboard-loading-observacoes" class="text-gray-500">Carregando...</p>
                         <div id="dashboard-observacoes-list" class="space-y-4">
-                            <!-- Observações serão inseridas aqui pelo JS -->
-                        </div>
+                            </div>
                     </div>
                 </div>
 
-                <!-- Aba 2: Desempenho (Notas) -->
                 <div id="dashboard-content-notas" class="hidden">
                     <h3 class="text-xl font-bold text-gray-700 mb-4">Desempenho nas Atividades</h3>
                     <p id="dashboard-loading-notas" class="text-gray-500">Carregando...</p>
                     <div id="dashboard-notas-list" class="space-y-3">
-                        <!-- Lista de notas/atividades será inserida aqui -->
-                    </div>
+                        </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ===== MODAL (POP-UP) PARA EDITAR ALUNO ===== -->
     <div id="edit-aluno-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-70 overflow-y-auto h-full w-full z-50">
         <div class="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
             <div class="flex justify-between items-center mb-6">
@@ -561,12 +578,10 @@
                     <input type="date" id="edit-aluno-nascimento" class="mt-1 w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
                 
-                <!-- Edição da Foto -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Foto Atual</label>
                     <div id="edit-aluno-foto-preview" class="mt-1 w-20 h-20 rounded-full overflow-hidden bg-gray-200">
-                        <!-- Foto atual ou placeholder -->
-                    </div>
+                        </div>
                     <label for="edit-aluno-foto-input" class="block text-sm font-medium text-gray-700 mt-2">Trocar Foto (opcional)</label>
                     <input type="file" id="edit-aluno-foto-input" accept="image/*" class="mt-1 block w-full text-sm text-gray-500
                         file:mr-4 file:py-2 file:px-4
@@ -588,7 +603,6 @@
         </div>
     </div>
     
-    <!-- ===== MODAL (POP-UP) PARA PERFIL DO USUÁRIO (NOVO) ===== -->
     <div id="perfil-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-70 overflow-y-auto h-full w-full z-50">
         <div class="relative top-10 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-2xl bg-white">
             <div class="flex justify-between items-center mb-6">
@@ -601,13 +615,11 @@
             <form id="perfil-form" class="space-y-4">
                 <input type="hidden" id="perfil-old-storage-path">
                 
-                <!-- Upload de Foto de Perfil -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Foto de Perfil</label>
                     <div class="flex items-center gap-4 mt-2">
                         <div id="perfil-foto-preview" class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-2 border-gray-300">
-                            <!-- Foto atual ou placeholder -->
-                        </div>
+                            </div>
                         <input type="file" id="perfil-foto-input" accept="image/*" class="block w-full text-sm text-gray-500
                             file:mr-4 file:py-2 file:px-4
                             file:rounded-lg file:border-0
@@ -617,7 +629,6 @@
                     </div>
                 </div>
 
-                <!-- Nome e Apelido -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="perfil-nome-completo" class="block text-sm font-medium text-gray-700">Nome Completo</label>
@@ -647,13 +658,10 @@
     </div>
 
 
-    <!-- ===== CAIXA DE MENSAGEM (Invisível por padrão) ===== -->
     <div id="message-box" class="hidden fixed bottom-5 right-5 p-4 rounded-lg shadow-xl text-white">
-        <!-- O conteúdo e a cor (bg-red-500 ou bg-green-500) serão definidos via JS -->
-    </div>
+        </div>
 
 
-    <!-- ===== Firebase SDKs ===== -->
     <script type="module">
         // Importações do Firebase (módulos necessários)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -673,6 +681,7 @@
             addDoc, 
             onSnapshot, 
             query,
+            where, // ADICIONADO
             setLogLevel,
             deleteDoc,
             serverTimestamp,
@@ -743,19 +752,23 @@
 
         // --- Variáveis Globais de Estado ---
         let currentUserId = null;
+        let selectedEscolaId = null; // NOVO
         let selectedTurmaId = null;
         let selectedAlunoId = null;
         let selectedAtividadeId = null;
         let isTurmaEditMode = false;
-        let globalPerfilCache = null; // NOVO
+        let globalPerfilCache = null; 
         let listaAlunosCache = []; 
         let listaAtividadesCache = []; 
+        let unsubscribeEscolas = null; // NOVO
         let unsubscribeTurmas = null;
-        let unsubscribePerfil = null; // NOVO
+        let unsubscribePerfil = null;
         let unsubscribeAlunos = null;
         let unsubscribeDashboardObservacoes = null; 
         let unsubscribePlanosDeAula = null;
         let unsubscribeAtividades = null;
+        let chartFrequencia = null; // NOVO
+        let chartNotas = null; // NOVO
 
         // --- Elementos da DOM (Autenticação e App) ---
         const authContainer = document.getElementById('auth-container');
@@ -765,14 +778,29 @@
         const logoutButton = document.getElementById('logout-button');
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
-        const userGreeting = document.getElementById('user-greeting'); // MODIFICADO
-        const navbarFotoPreview = document.getElementById('navbar-foto-preview'); // NOVO
+        const userGreeting = document.getElementById('user-greeting');
+        const navbarFotoPreview = document.getElementById('navbar-foto-preview');
         const messageBox = document.getElementById('message-box');
+
+        // --- Elementos da DOM (Lista de Escolas - NOVO) ---
+        const escolasListContainer = document.getElementById('escolas-list-container');
+        const escolasList = document.getElementById('escolas-list');
+        const loadingEscolas = document.getElementById('loading-escolas');
+
+        // --- Elementos da DOM (Modal Nova Escola - NOVO) ---
+        const novaEscolaModal = document.getElementById('nova-escola-modal');
+        const showEscolaModalButton = document.getElementById('show-escola-modal-button');
+        const closeEscolaModalButton = document.getElementById('close-escola-modal-button');
+        const novaEscolaForm = document.getElementById('nova-escola-form');
+        const escolaNomeInput = document.getElementById('escola-nome');
+        const escolaEnderecoInput = document.getElementById('escola-endereco');
 
         // --- Elementos da DOM (Lista de Turmas) ---
         const turmasListContainer = document.getElementById('turmas-list-container');
         const turmasList = document.getElementById('turmas-list');
         const loadingTurmas = document.getElementById('loading-turmas');
+        const turmasListHeaderTitle = document.getElementById('turmas-list-header-title'); 
+        const voltarEscolasButton = document.getElementById('voltar-escolas-button'); 
         
         // --- Elementos da DOM (Modal Nova Turma / Editar) ---
         const novaTurmaModal = document.getElementById('nova-turma-modal');
@@ -817,7 +845,7 @@
         const editAlunoInfoGeral = document.getElementById('edit-aluno-info-geral');
         const submitEditAlunoButton = document.getElementById('submit-edit-aluno-button');
         
-        // --- Elementos da DOM (Modal Perfil do Usuário - NOVO) ---
+        // --- Elementos da DOM (Modal Perfil do Usuário) ---
         const perfilModal = document.getElementById('perfil-modal');
         const openPerfilModalButton = document.getElementById('open-perfil-modal-button');
         const closePerfilModalButton = document.getElementById('close-perfil-modal-button');
@@ -844,10 +872,12 @@
         const tabFrequencia = document.getElementById('tab-frequencia'); 
         const tabPlanoAula = document.getElementById('tab-plano-aula');
         const tabNotas = document.getElementById('tab-notas'); 
+        const tabRelatorios = document.getElementById('tab-relatorios'); // NOVO
         const alunosContent = document.getElementById('alunos-content');
         const frequenciaContent = document.getElementById('frequencia-content'); 
         const planoAulaContent = document.getElementById('plano-aula-content');
         const notasContent = document.getElementById('notas-content');
+        const relatoriosContent = document.getElementById('relatorios-content'); // NOVO
 
         // --- Elementos da DOM (Aba Alunos) ---
         const novoAlunoForm = document.getElementById('novo-aluno-form');
@@ -891,6 +921,16 @@
         const lancamentoAlunosList = document.getElementById('lancamento-alunos-list');
         const loadingLancamentoAlunos = document.getElementById('loading-lancamento-alunos');
         const salvarNotasButton = document.getElementById('salvar-notas-button');
+
+        // --- Elementos da DOM (Aba Relatórios - NOVO) ---
+        const loadingRelatorioFrequencia = document.getElementById('loading-relatorio-frequencia');
+        const frequenciaChartContainer = document.getElementById('frequencia-chart-container');
+        const frequenciaChartCanvas = document.getElementById('frequencia-chart');
+        const loadingRankingFaltas = document.getElementById('loading-ranking-faltas');
+        const rankingFaltasList = document.getElementById('ranking-faltas-list');
+        const loadingRelatorioNotas = document.getElementById('loading-relatorio-notas');
+        const notasChartContainer = document.getElementById('notas-chart-container');
+        const notasChartCanvas = document.getElementById('notas-chart');
 
 
         // --- Elementos da DOM (Modal Dashboard Aluno) ---
@@ -937,6 +977,17 @@
             const day = String(today.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
+
+        
+        // --- Controle do Modal (Escola) ---
+        
+        showEscolaModalButton.addEventListener('click', () => {
+            novaEscolaForm.reset();
+            novaEscolaModal.classList.remove('hidden');
+        });
+        closeEscolaModalButton.addEventListener('click', () => {
+            novaEscolaModal.classList.add('hidden');
+        });
 
 
         // --- Controle do Modal (Turma) ---
@@ -1026,7 +1077,7 @@
         closeEditAlunoModalButton.addEventListener('click', closeEditAlunoModal);
         
         
-        // --- Controle do Modal (Perfil do Usuário - NOVO) ---
+        // --- Controle do Modal (Perfil do Usuário) ---
         
         function openPerfilModal() {
             if (!auth.currentUser) return;
@@ -1119,10 +1170,64 @@
 
         // --- Lógica de Navegação (Roteamento e Abas) ---
 
+        function showEscolasList() {
+            escolasListContainer.classList.remove('hidden');
+            turmasListContainer.classList.add('hidden');
+            turmaDetalheContainer.classList.add('hidden');
+            
+            selectedEscolaId = null;
+            selectedTurmaId = null;
+            listaAlunosCache = []; 
+            listaAtividadesCache = []; 
+            
+            // Limpa todos os listeners de sub-coleções
+            if (unsubscribeTurmas) unsubscribeTurmas();
+            if (unsubscribeAlunos) unsubscribeAlunos();
+            if (unsubscribeDashboardObservacoes) unsubscribeDashboardObservacoes(); 
+            if (unsubscribePlanosDeAula) unsubscribePlanosDeAula();
+            if (unsubscribeAtividades) unsubscribeAtividades();
+
+            // Destruir gráficos
+            if (chartFrequencia) {
+                chartFrequencia.destroy();
+                chartFrequencia = null;
+            }
+            if (chartNotas) {
+                chartNotas.destroy();
+                chartNotas = null;
+            }
+        }
+
+        // Conecta o novo botão "Voltar"
+        voltarEscolasButton.addEventListener('click', showEscolasList);
+
+
+        // showTurmasList agora é chamada a partir da lista de escolas
+        function showTurmasList(escolaId, escolaNome) {
+            if (!escolaId) return;
+            
+            selectedEscolaId = escolaId;
+            turmasListHeaderTitle.textContent = `Turmas (${escolaNome})`; // Atualiza o título
+
+            escolasListContainer.classList.add('hidden');
+            turmasListContainer.classList.remove('hidden');
+            turmaDetalheContainer.classList.add('hidden');
+            
+            selectedTurmaId = null; 
+            
+            // Limpa listeners antigos (caso esteja trocando de escola)
+            if (unsubscribeTurmas) unsubscribeTurmas();
+            
+            // Carrega as turmas da escola selecionada
+            carregarTurmas(); 
+        }
+
+
         async function showTurmaDetalhe(turmaId, turmaNome) { 
             selectedTurmaId = turmaId;
             turmaDetalheNome.textContent = turmaNome;
-            turmasListContainer.classList.add('hidden');
+            
+            turmasListContainer.classList.add('hidden'); // Esconde a lista de turmas
             turmaDetalheContainer.classList.remove('hidden');
             
             muralAvisosTextarea.value = '';
@@ -1146,9 +1251,11 @@
             carregarAtividades(); 
         }
 
-        function showTurmasList() {
+        // voltar-turmas-button (botão da tela de DETALHE da turma)
+        voltarTurmasButton.addEventListener('click', () => {
+            // Esta função deve voltar para a LISTA DE TURMAS (da escola atual)
             turmaDetalheContainer.classList.add('hidden');
-            turmasListContainer.classList.remove('hidden');
+            turmasListContainer.classList.remove('hidden'); // Mostra a lista de turmas
             selectedTurmaId = null;
             listaAlunosCache = []; 
             listaAtividadesCache = []; 
@@ -1157,8 +1264,18 @@
             if (unsubscribeDashboardObservacoes) unsubscribeDashboardObservacoes(); 
             if (unsubscribePlanosDeAula) unsubscribePlanosDeAula();
             if (unsubscribeAtividades) unsubscribeAtividades();
-        }
-        voltarTurmasButton.addEventListener('click', showTurmasList);
+
+            // Destruir gráficos
+            if (chartFrequencia) {
+                chartFrequencia.destroy();
+                chartFrequencia = null;
+            }
+            if (chartNotas) {
+                chartNotas.destroy();
+                chartNotas = null;
+            }
+        });
+
 
         salvarMuralButton.addEventListener('click', async () => {
             if (!currentUserId || !selectedTurmaId) return;
@@ -1186,17 +1303,20 @@
         tabFrequencia.addEventListener('click', () => switchTab('frequencia')); 
         tabPlanoAula.addEventListener('click', () => switchTab('plano-aula'));
         tabNotas.addEventListener('click', () => switchTab('notas'));
+        tabRelatorios.addEventListener('click', () => switchTab('relatorios')); // NOVO
 
         function switchTab(tab) {
             tabAlunos.classList.toggle('active', tab === 'alunos');
             tabFrequencia.classList.toggle('active', tab === 'frequencia'); 
             tabPlanoAula.classList.toggle('active', tab === 'plano-aula');
             tabNotas.classList.toggle('active', tab === 'notas');
+            tabRelatorios.classList.toggle('active', tab === 'relatorios'); // NOVO
             
             alunosContent.classList.toggle('hidden', tab !== 'alunos');
             frequenciaContent.classList.toggle('hidden', tab !== 'frequencia'); 
             planoAulaContent.classList.toggle('hidden', tab !== 'plano-aula');
             notasContent.classList.toggle('hidden', tab !== 'notas');
+            relatoriosContent.classList.toggle('hidden', tab !== 'relatorios'); // NOVO
             
             if (tab === 'notas') {
                 showAtividadesList();
@@ -1208,20 +1328,23 @@
                 loadingFrequencia.classList.add('hidden');
                 salvarFrequenciaButton.classList.add('hidden');
             }
+
+            if (tab === 'relatorios') { // NOVO
+                carregarRelatorios();
+            }
         }
 
-        // --- Lógica de Autenticação (MODIFICADA) ---
+        // --- Lógica de Autenticação ---
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 currentUserId = user.uid;
-                // userEmailSpan.textContent = user.email; // Removido, agora é dinâmico
                 authContainer.classList.add('hidden');
                 appContainer.classList.remove('hidden');
                 
-                showTurmasList();
-                carregarTurmas();
-                carregarPerfil(); // NOVO: Carrega o perfil do usuário
+                showEscolasList(); // Mostrar lista de escolas
+                carregarPerfil(); 
+                carregarEscolas(); // Carregar escolas
 
             } else {
                 currentUserId = null;
@@ -1229,14 +1352,15 @@
                 appContainer.classList.add('hidden');
                 
                 if (unsubscribeTurmas) unsubscribeTurmas();
-                if (unsubscribePerfil) unsubscribePerfil(); // NOVO: Limpa o listener do perfil
+                if (unsubscribePerfil) unsubscribePerfil(); 
+                if (unsubscribeEscolas) unsubscribeEscolas(); // Limpar listener de escolas
                 
                 // Limpa a UI da navbar no logout
                 userGreeting.textContent = "Carregando...";
                 navbarFotoPreview.innerHTML = placeholderIcon;
                 globalPerfilCache = null;
                 
-                showTurmasList(); 
+                showEscolasList(); // Garantir que volte para a tela de escolas
             }
         });
 
@@ -1281,13 +1405,241 @@
             try {
                 await signOut(auth);
                 showMessage("Você saiu com sucesso.", "success");
-                showTurmasList();
+                showEscolasList();
             } catch (error) {
                 showMessage("Erro ao tentar sair.", "error");
             }
         });
+
         
-        // --- Lógica do Firestore (Perfil do Usuário - NOVO) ---
+        // --- Lógica do Firestore (Relatórios - NOVO) ---
+
+        async function carregarRelatorios() {
+            if (!currentUserId || !selectedTurmaId) return;
+
+            // Limpa os gráficos antigos antes de desenhar novos
+            if (chartFrequencia) {
+                chartFrequencia.destroy();
+                chartFrequencia = null;
+            }
+            if (chartNotas) {
+                chartNotas.destroy();
+                chartNotas = null;
+            }
+            
+            // Exibe loaders e esconde containers
+            loadingRelatorioFrequencia.classList.remove('hidden');
+            loadingRelatorioFrequencia.textContent = "Calculando...";
+            loadingRankingFaltas.classList.remove('hidden');
+            loadingRankingFaltas.textContent = "Calculando...";
+            loadingRelatorioNotas.classList.remove('hidden');
+            loadingRelatorioNotas.textContent = "Calculando...";
+            
+            frequenciaChartContainer.classList.add('hidden');
+            notasChartContainer.classList.add('hidden');
+            rankingFaltasList.innerHTML = '';
+
+            // Chama as funções de cálculo
+            await calcularRelatorioFrequencia();
+            calcularRelatorioNotas();
+        }
+
+        async function calcularRelatorioFrequencia() {
+            if (!currentUserId || !selectedTurmaId) return;
+
+            // Calcula a data de 30 dias atrás
+            const dataLimite = new Date();
+            dataLimite.setDate(dataLimite.getDate() - 30);
+            const dataLimiteString = dataLimite.toISOString().split('T')[0]; // Formato 'YYYY-MM-DD'
+
+            const collectionPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/frequencia`;
+            const q = query(
+                collection(db, collectionPath),
+                where("data", ">=", dataLimiteString)
+            );
+
+            let totalPresentes = 0;
+            let totalFaltas = 0;
+            let totalJustificados = 0;
+            const rankingFaltas = {}; // Objeto para contar faltas por aluno
+
+            // Inicializa o ranking com todos os alunos do cache
+            listaAlunosCache.forEach(aluno => {
+                rankingFaltas[aluno.id] = { nome: aluno.nome, faltas: 0 };
+            });
+
+            try {
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    loadingRelatorioFrequencia.textContent = "Nenhum dado de frequência nos últimos 30 dias.";
+                    loadingRankingFaltas.textContent = "Nenhum dado de frequência nos últimos 30 dias.";
+                    return;
+                }
+
+                querySnapshot.forEach(doc => {
+                    const dia = doc.data();
+                    const statusAlunos = dia.statusAlunos || {};
+                    
+                    // Itera sobre os alunos que tiveram status registrado naquele dia
+                    Object.keys(statusAlunos).forEach(alunoId => {
+                        const status = statusAlunos[alunoId];
+                        if (status === 'P') {
+                            totalPresentes++;
+                        } else if (status === 'F') {
+                            totalFaltas++;
+                            // Adiciona ao ranking apenas se o aluno ainda existir no cache
+                            if (rankingFaltas[alunoId]) {
+                                rankingFaltas[alunoId].faltas++;
+                            }
+                        } else if (status === 'J') {
+                            totalJustificados++;
+                        }
+                    });
+                });
+
+                // Renderiza o gráfico de pizza
+                loadingRelatorioFrequencia.classList.add('hidden');
+                frequenciaChartContainer.classList.remove('hidden');
+                renderizarGraficoFrequencia(totalPresentes, totalFaltas, totalJustificados);
+
+                // Renderiza o ranking
+                loadingRankingFaltas.classList.add('hidden');
+                renderizarRankingFaltas(rankingFaltas);
+
+            } catch (error) {
+                console.error("Erro ao calcular relatório de frequência: ", error);
+                showMessage("Erro ao buscar dados de frequência. (Verifique o console para criar o índice no Firestore)", "error");
+                loadingRelatorioFrequencia.textContent = "Erro ao carregar dados.";
+                loadingRankingFaltas.textContent = "Erro ao carregar dados.";
+            }
+        }
+
+        function renderizarGraficoFrequencia(presentes, faltas, justificados) {
+            if (chartFrequencia) chartFrequencia.destroy();
+            const ctx = frequenciaChartCanvas.getContext('2d');
+            chartFrequencia = new Chart(ctx, {
+                type: 'doughnut', // Gráfico de "rosca"
+                data: {
+                    labels: ['Presentes', 'Faltas', 'Justificados'],
+                    datasets: [{
+                        label: 'Frequência',
+                        data: [presentes, faltas, justificados],
+                        backgroundColor: [
+                            '#10B981', // green-500
+                            '#EF4444', // red-500
+                            '#F59E0B', // yellow-500
+                        ],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                    }
+                }
+            });
+        }
+
+        function renderizarRankingFaltas(ranking) {
+            rankingFaltasList.innerHTML = '';
+            
+            // Converte o objeto em array e ordena por mais faltas
+            const rankingOrdenado = Object.values(ranking)
+                .sort((a, b) => b.faltas - a.faltas);
+
+            if (rankingOrdenado.length === 0 || rankingOrdenado.every(a => a.faltas === 0)) {
+                rankingFaltasList.innerHTML = '<p class="text-gray-500 text-center">Nenhuma falta registrada nos últimos 30 dias.</p>';
+                return;
+            }
+
+            rankingOrdenado.forEach(aluno => {
+                if (aluno.faltas > 0) { // Mostra apenas quem faltou
+                    const div = document.createElement('div');
+                    div.className = "flex justify-between items-center bg-gray-50 p-3 rounded-lg";
+                    div.innerHTML = `
+                        <p class="font-medium text-gray-800">${aluno.nome}</p>
+                        <p class="font-bold text-red-600">${aluno.faltas} ${aluno.faltas > 1 ? 'faltas' : 'falta'}</p>
+                    `;
+                    rankingFaltasList.appendChild(div);
+                }
+            });
+        }
+
+        function calcularRelatorioNotas() {
+            // Usa o cache de atividades e alunos que já temos
+            if (listaAtividadesCache.length === 0) {
+                loadingRelatorioNotas.textContent = "Nenhuma atividade criada para gerar médias.";
+                return;
+            }
+            
+            const labels = []; // Nomes das atividades
+            const medias = []; // Média da turma em cada atividade
+            const totalAlunos = listaAlunosCache.length;
+
+            if (totalAlunos === 0) {
+                loadingRelatorioNotas.textContent = "Nenhum aluno na turma para calcular médias.";
+                return;
+            }
+
+            listaAtividadesCache.forEach(atividade => {
+                labels.push(atividade.nome);
+                const notas = atividade.notas || {};
+                let soma = 0;
+                
+                Object.values(notas).forEach(nota => {
+                    // Converte '7,5' ou '7.5' para 7.5
+                    const valorNota = parseFloat(String(nota).replace(',', '.')); 
+                    if (!isNaN(valorNota)) {
+                        soma += valorNota;
+                    }
+                });
+
+                // Calcula a média da turma (soma das notas / total de alunos)
+                const mediaTurma = (soma / totalAlunos);
+                medias.push(mediaTurma.toFixed(2)); // Arredonda para 2 casas
+            });
+
+            loadingRelatorioNotas.classList.add('hidden');
+            notasChartContainer.classList.remove('hidden');
+            renderizarGraficoNotas(labels, medias);
+        }
+        
+        function renderizarGraficoNotas(labels, medias) {
+            if (chartNotas) chartNotas.destroy();
+            const ctx = notasChartCanvas.getContext('2d');
+            chartNotas = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Média da Turma',
+                        data: medias,
+                        backgroundColor: 'rgba(79, 70, 229, 0.8)', // indigo-600 com opacidade
+                        borderColor: 'rgba(79, 70, 229, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 10 // Sugere que o eixo Y vá até 10
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+        
+        // --- Lógica do Firestore (Perfil do Usuário) ---
         
         function carregarPerfil() {
             if (!currentUserId) return;
@@ -1376,13 +1728,105 @@
             }
         });
 
+        
+        // --- Lógica do Firestore (Escolas) ---
+
+        function carregarEscolas() {
+            if (!currentUserId) return;
+            const collectionPath = `usuarios/${currentUserId}/escolas`;
+            const q = query(collection(db, collectionPath));
+            
+            if (unsubscribeEscolas) unsubscribeEscolas();
+            unsubscribeEscolas = onSnapshot(q, (snapshot) => {
+                loadingEscolas.classList.add('hidden');
+                escolasList.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    escolasList.innerHTML = '<p class="text-gray-500 col-span-full text-center">Nenhuma escola cadastrada. Crie sua primeira!</p>';
+                    return;
+                }
+                
+                snapshot.forEach((doc) => {
+                    const escola = doc.data();
+                    const escolaId = doc.id;
+                    
+                    const escolaCard = document.createElement('div');
+                    escolaCard.className = "bg-white p-6 rounded-2xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 flex flex-col justify-between";
+                    escolaCard.innerHTML = `
+                        <div>
+                            <h3 class="text-xl font-bold text-indigo-700">${escola.nome}</h3>
+                            <p class="text-gray-600 mt-2">${escola.endereco || 'Sem endereço'}</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-end gap-3">
+                            <button class="delete-escola-button text-red-500 hover:text-red-700 text-sm font-medium">
+                                <i class="fas fa-trash mr-1"></i> Excluir
+                            </button>
+                        </div>
+                    `;
+                    
+                    // Clique no card (fora dos botões)
+                    escolaCard.addEventListener('click', (e) => {
+                        if (e.target.closest('button')) return;
+                        showTurmasList(escolaId, escola.nome); // Chama a lista de turmas desta escola
+                    });
+
+                    // Botão de excluir
+                    escolaCard.querySelector('.delete-escola-button').addEventListener('click', (e) => {
+                        e.stopPropagation(); 
+                        handleDeleteEscola(escolaId, escola.nome);
+                    });
+
+                    escolasList.appendChild(escolaCard);
+                });
+            }, (error) => { showMessage("Erro ao carregar suas escolas.", "error"); });
+        }
+
+        // Submit do form de nova escola
+        novaEscolaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUserId) return;
+
+            const nome = escolaNomeInput.value;
+            const endereco = escolaEnderecoInput.value;
+            
+            try {
+                const collectionPath = `usuarios/${currentUserId}/escolas`;
+                await addDoc(collection(db, collectionPath), {
+                    nome: nome,
+                    endereco: endereco || ""
+                });
+                showMessage("Escola criada com sucesso!", "success");
+                novaEscolaModal.classList.add('hidden');
+            } catch (error) { 
+                showMessage("Erro ao salvar a escola.", "error"); 
+            }
+        });
+
+        // Função de deletar escola
+        async function handleDeleteEscola(escolaId, escolaNome) {
+            console.warn("Confirmação de exclusão pulada.");
+            if (!currentUserId) return;
+            
+            try {
+                const docPath = `usuarios/${currentUserId}/escolas/${escolaId}`;
+                await deleteDoc(doc(db, docPath));
+                showMessage(`Escola "${escolaNome}" excluída.`, "success");
+            } catch (error) { showMessage("Erro ao excluir a escola.", "error"); }
+        }
+
 
         // --- Lógica do Firestore (Turmas) ---
 
         function carregarTurmas() {
-            if (!currentUserId) return;
+            if (!currentUserId || !selectedEscolaId) return; 
+            
             const collectionPath = `usuarios/${currentUserId}/turmas`;
-            const q = query(collection(db, collectionPath));
+            
+            // QUERY MODIFICADA (Requer Índice no Firestore)
+            const q = query(
+                collection(db, collectionPath),
+                where("escolaId", "==", selectedEscolaId) 
+            );
             
             if (unsubscribeTurmas) unsubscribeTurmas();
             unsubscribeTurmas = onSnapshot(q, (snapshot) => {
@@ -1390,7 +1834,7 @@
                 turmasList.innerHTML = '';
                 
                 if (snapshot.empty) {
-                    turmasList.innerHTML = '<p class="text-gray-500 col-span-full text-center">Nenhuma turma encontrada. Crie sua primeira turma!</p>';
+                    turmasList.innerHTML = '<p class="text-gray-500 col-span-full text-center">Nenhuma turma encontrada para esta escola. Crie a primeira!</p>';
                     return;
                 }
                 
@@ -1432,12 +1876,20 @@
 
                     turmasList.appendChild(turmaCard);
                 });
-            }, (error) => { showMessage("Erro ao carregar suas turmas.", "error"); });
+            }, (error) => { 
+                console.error("Erro ao carregar turmas (VERIFIQUE O ÍNDICE!): ", error);
+                showMessage("Erro ao carregar suas turmas. (Verifique o console para criar o índice no Firestore)", "error");
+            });
         }
 
         novaTurmaForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUserId) return;
+
+            if (!selectedEscolaId) {
+                showMessage("Nenhuma escola selecionada.", "error");
+                return;
+            }
 
             const nome = turmaNomeInput.value;
             const materia = turmaMateriaInput.value;
@@ -1456,7 +1908,8 @@
                     await addDoc(collection(db, collectionPath), {
                         nome: nome,
                         materia: materia,
-                        muralAvisos: "" 
+                        muralAvisos: "",
+                        escolaId: selectedEscolaId // <-- IMPORTANTE
                     });
                     showMessage("Turma criada com sucesso!", "success");
                 }
@@ -2151,7 +2604,8 @@
             const atividadesOrdenadas = [...listaAtividadesCache].sort((a, b) => a.nome.localeCompare(b.nome));
 
             atividadesOrdenadas.forEach(atividade => {
-                const nota = atividade.notas[selectedAlunoId] || '--';
+                const notasDaAtividade = atividade.notas || {};
+                const nota = notasDaAtividade[selectedAlunoId] || '--';
                 const valorMaximo = atividade.valorMaximo || '10';
 
                 const notaCard = document.createElement('div');
@@ -2193,7 +2647,8 @@
             alunosOrdenados.forEach(aluno => {
                 let row = [(aluno.nome || "").replace(/,/g, "")];
                 atividadesOrdenadas.forEach(atv => {
-                    const nota = atv.notas[aluno.id] || ''; 
+                    const notasDaAtividade = atv.notas || {};
+                    const nota = notasDaAtividade[aluno.id] || ''; 
                     row.push(nota);
                 });
                 csvContent += row.join(",") + "\r\n";
@@ -2342,18 +2797,28 @@
             if (!currentUserId || !selectedTurmaId || !selectedAtividadeId) return;
 
             const inputs = lancamentoAlunosList.querySelectorAll('input[data-aluno-id]');
-            const novasNotas = {};
-
-            inputs.forEach(input => {
-                const alunoId = input.dataset.alunoId;
-                const nota = input.value;
-                if (nota) { 
-                    novasNotas[alunoId] = nota;
-                }
-            });
+            let novasNotas = {};
             
             try {
                 const docPath = `usuarios/${currentUserId}/turmas/${selectedTurmaId}/atividades/${selectedAtividadeId}`;
+                
+                // Pega o documento de atividade para mesclar as notas
+                const atividadeDoc = await getDoc(doc(db, docPath));
+                if (atividadeDoc.exists()) {
+                    novasNotas = atividadeDoc.data().notas || {};
+                }
+
+                inputs.forEach(input => {
+                    const alunoId = input.dataset.alunoId;
+                    const nota = input.value;
+                    if (nota) { 
+                        novasNotas[alunoId] = nota;
+                    } else {
+                        // Se a nota for apagada, remove a chave
+                        delete novasNotas[alunoId];
+                    }
+                });
+
                 await updateDoc(doc(db, docPath), {
                     notas: novasNotas
                 });
